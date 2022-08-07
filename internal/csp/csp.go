@@ -1,9 +1,13 @@
+// Package csp implements a recursive constraint satisfaction problem
+// solver.
 package csp
 
 import (
 	"fmt"
 )
 
+// Decision represents a single decision to be made, for example a
+// single grid square in a sudoku or similar puzzle.
 type Decision struct {
 	possibilities map[int]bool
 	groups []*Group
@@ -21,6 +25,8 @@ func newDecision(size int, p *Problem) *Decision {
 	return &result
 }
 
+// Value returns the value of a decision if the decision has been made
+// or -1 if multiple possibilities remain.
 func (d *Decision) Value() int {
 	if len(d.possibilities) != 1 {
 		return -1
@@ -31,6 +37,15 @@ func (d *Decision) Value() int {
 	return -1
 }
 
+func (d *Decision) StringValue() string {
+	if v := d.Value(); v < 0 {
+		return ""
+	} else {
+		return d.p.valueSet[v]
+	}
+}
+
+// Count returns the number of remaining options for the decision.
 func (d *Decision) Count() int {
 	return len(d.possibilities)
 }
@@ -41,6 +56,7 @@ func (d *Decision) undo(item undoRestricts) {
 	}
 }
 
+// Restrict removes i as a possibility for the decision.
 func (d *Decision) Restrict(i int) {
 	if d.possibilities[i] {
 		delete(d.possibilities, i)
@@ -51,6 +67,8 @@ func (d *Decision) Restrict(i int) {
 	}
 }
 
+// RestrictTo removes everything but i as a possibility for the
+// decision.
 func (d *Decision) RestrictTo(i int) {
 	for k := range d.possibilities {
 		if k != i {
@@ -60,22 +78,50 @@ func (d *Decision) RestrictTo(i int) {
 
 }
 
+func (d *Decision) RestrictToSet(s map[int]bool) {
+	for k := range d.possibilities {
+		if !s[k] {
+			d.Restrict(k)
+		}
+	}
+}
+
+func (d *Decision) Possible(i int) bool {
+	return d.possibilities[i]
+}
+
+// Group represents a grouping of Decisions over which to apply a
+// constraint, for example a row or column in a sudoku puzzle with a
+// uniqueness constraint.
 type Group struct {
 	decisions []*Decision
 	constraint ConstraintChecker
 }
 
-type ConstraintChecker interface {
-	Check(all, dirty []*Decision) bool
+func (g *Group) Decisions() []*Decision {
+	return g.decisions
 }
 
+// A ConstraintChecker is any object that can be used to validate a
+// constraint over a group.
+type ConstraintChecker interface {
+	Init(all []*Decision, size int)
+	Apply(all, dirty []*Decision) bool
+}
+
+// A Printer is an object that will be called at certain critical
+// points during a solve, for example when a solution has been
+// found. In spite of the name, it may also simply memorize,
+// summarize, sample, or do anything else really.
 type Printer interface {
 	MakeDecision(p *Problem)
 	CaptureSolution(p *Problem)
 }
 
+// A Decider decides which decision to decide next. Seriously. Wow
+// this needs a better name.
 type Decider interface {
-	Decide(d []*Decision) *Decision
+	Decide(d []*Decision, g []*Group) *Decision
 }
 
 type Settings interface {
@@ -85,6 +131,8 @@ type Settings interface {
 
 type undoRestricts []int 
 
+// A Problem captures the decisions and groups, as well as any
+// ephemeral state used to solve the problem.
 type Problem struct {
 	valueSet []string
 	decisions []*Decision
@@ -103,14 +151,12 @@ func (p *Problem) ValueSet() []string {
 }
 
 func (p *Problem) check() bool {
-	//fmt.Printf("Check\n")
 	if p.conflict {
 		p.dirty = map[*Decision]bool{}
 		p.conflict = false
 		return false
 	}
 	for ; len(p.dirty) > 0; {
-		//fmt.Printf("Len = %d\n", len(p.dirty))
 		groups := map[*Group][]*Decision{}
 		for d, _ := range p.dirty {
 			for _, g := range d.groups {
@@ -119,10 +165,9 @@ func (p *Problem) check() bool {
 		}
 		p.dirty = map[*Decision]bool{}
 		for g, dirty := range groups {
-			if !g.constraint.Check(g.decisions, dirty) {
-				p.dirty = map[*Decision]bool{}
-				p.conflict = false
-				return false
+			if !g.constraint.Apply(g.decisions, dirty) {
+				p.conflict = true
+				break
 			}
 		}
 		if p.conflict {
@@ -159,6 +204,8 @@ func (p *Problem) setConflict() {
 	p.conflict = true
 }
 
+// Attempts to solve the Problem, and returns true if a solution
+// exists.
 func (p *Problem) Solve(s Settings) bool {
 	if !p.check() {
 		return false
@@ -177,15 +224,8 @@ func (p *Problem) recSolve(s Settings) bool {
 		s.CaptureSolution(p)
 		return true
 	}
-	d := s.Decide(ds)
-	/*d := 0
-	for ; d < len(p.decisions) && p.decisions[d].Value() >= 0; d++ {}
-	if d == len(p.decisions) {
-		s.CaptureSolution(p)
-		return true
-	}*/
-	for i := 0; i < len(p.valueSet); i++ {
-		//fmt.Printf("Trying (%d, %d)\n", d, i)
+	d := s.Decide(ds, p.groups)
+	for i := 0; i < len(p.valueSet); i++ {  // Improve by iterating over available values for d?
 		s.MakeDecision(p)
 		p.snapshot()
 		d.RestrictTo(i)
@@ -197,6 +237,7 @@ func (p *Problem) recSolve(s Settings) bool {
 	return false
 }
 
+// Print the current state of the problem. 
 func (p *Problem) Print() {
 	for i, d := range p.decisions {
 		val := ""
@@ -208,6 +249,8 @@ func (p *Problem) Print() {
 	fmt.Println("")
 }
 
+// Set the value for a given decision. Used to set the initial
+// configuration, for example the givens on a sudoku problem.
 func (p *Problem) Set(i int, val int) {
 	p.decisions[i].RestrictTo(val)
 }
@@ -218,6 +261,7 @@ func (p *Problem) AddGroup(group []int, constraint ConstraintChecker) {
 		g.decisions = append(g.decisions, p.decisions[d])
 		p.decisions[d].groups = append(p.decisions[d].groups, &g)
 	}
+	constraint.Init(g.decisions, len(p.valueSet))
 	p.groups = append(p.groups, &g)
 }
 
