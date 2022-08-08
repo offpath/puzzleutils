@@ -104,33 +104,3 @@ func NewSudokuPuzzle() *GridPuzzle {
 	}
 	return p
 }
-
-type nonogramConstraint struct{
-	lengths []int
-}
-func (c nonogramConstraint) Init(all []*csp.Decision, size int){}
-func (c nonogramConstraint) Apply(all, dirty []*csp.Decision) bool {
-	b := csp.NewBuildupSet(len(all))
-	var f func(index int)
-	f = func(index int, start int) {
-		sum := len(c.lengths) - index - 1
-		for i := index; i < len(c.lengths); i++ {
-			sum += c.lengths[i]
-		}
-		for i := start; i <= len(all) - sum; i++ {
-			
-		}
-	}
-	f(0)
-	return true
-}
-
-func NewNonogramPuzzle(rows, cols [][]int) {
-	p := NewGridPuzzle(len(cols), len(rows), []string{" ", "X"})
-	for i, g := range p.RowGroups() {
-		p.AddGroup(g, nonogramConstraint{rows[i]})
-	}
-	for i, g := range p.ColumnGroups() {
-		p.AddGroup(g, nonogramConstraint{cols[i]})
-	}
-}
