@@ -4,7 +4,6 @@ import (
 	_ "fmt"
 	
 	"puzzleutils/internal/csp"
-	"puzzleutils/internal/trie"
 )
 
 func Unique() csp.ConstraintChecker {
@@ -23,10 +22,6 @@ func Set(s []int) csp.ConstraintChecker {
 	return set{s}
 }
 
-func ValidWord(t trie.Trie) csp.ConstraintChecker {
-	return validWord{t}
-}
-	
 type unique struct {}
 func (c unique) Init(all []*csp.Decision, size int){}
 func (c unique) Apply(all, dirty []*csp.Decision) bool {
@@ -87,27 +82,6 @@ func (c set) Init(all []*csp.Decision, size int) {
 func (c set) Apply(all, dirty []*csp.Decision) bool {
 
 	return true
-}
-
-type validWord struct {
-	t trie.Trie
-}
-func (c validWord) Init(all []*csp.Decision, size int) {}
-func (c validWord) Apply(all, dirty []*csp.Decision) bool {
-	s := ""
-	whole := true
-	for _, d := range all {
-		if v := d.StringValue(); v != "" {
-			s += v
-		} else {
-			whole = false
-			break
-		}
-	}
-	if whole {
-		return c.t.HasWord(s)
-	}
-	return c.t.HasPrefix(s)
 }
 
 type BuildupSet struct {
