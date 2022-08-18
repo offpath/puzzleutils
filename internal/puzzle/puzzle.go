@@ -89,17 +89,23 @@ func (p *GridPuzzle) RowGroups() [][]GridEntry {
 	return result
 }
 
-func (p *GridPuzzle) Print() {
+func (p *GridPuzzle) ToString() string {
+	result := ""
 	for i := 0; i < p.height; i++ {
 		for j := 0; j < p.width; j++ {
 			v := p.Get(i * p.width + j).StringValue()
 			if v == "" {
 				v = " "
 			}
-			fmt.Print(v)
+			result += v
 		}
-		fmt.Println("")
+		result += "\n"
 	}
+	return result
+}
+
+func (p *GridPuzzle) Print() {
+	fmt.Print(p.ToString())
 }
 
 func NewSudokuPuzzle() *GridPuzzle {
