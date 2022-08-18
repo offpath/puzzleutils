@@ -49,6 +49,7 @@ func (dec *DecideMinMin) Decide(decisions []*csp.Decision, groups []*csp.Group) 
 type Printer struct {
 	count int
 	multiple int
+	p *puzzle.GridPuzzle
 }
 
 func (s *Printer) MakeDecision(p *csp.Problem) {
@@ -59,7 +60,7 @@ func (s *Printer) MakeDecision(p *csp.Problem) {
 }
 
 func (s *Printer) CaptureSolution(p *csp.Problem) {
-	//p.Print()
+	s.p.Print()
 }
 
 type Settings struct {
@@ -96,7 +97,7 @@ func main() {
 			"..2.1...." +
 			"....4...9")
 
-	p0 := Printer{0, 100000}
+	p0 := Printer{0, 100000, sudoku0}
 	s0 := Settings{&p0, &DecideFirst{}}
 	sudoku0.Solve(s0)
 	fmt.Printf("Decisions made: %d\n", p0.count)
@@ -113,7 +114,7 @@ func main() {
 			"..2.1...." +
 			"....4...9")
 
-	p1 := Printer{0, 100000}
+	p1 := Printer{0, 100000, sudoku1}
 	s1 := Settings{&p1, &DecideMin{}}
 	sudoku1.Solve(s1)
 	fmt.Printf("Decisions made: %d\n", p1.count)	
@@ -130,8 +131,68 @@ func main() {
 			"..2.1...." +
 			"....4...9")
 
-	p2 := Printer{0, 100000}
+	p2 := Printer{0, 100000, sudoku2}
 	s2 := Settings{&p2, &DecideMinMin{}}
 	sudoku2.Solve(s2)
-	fmt.Printf("Decisions made: %d\n", p2.count)	
+	fmt.Printf("Decisions made: %d\n", p2.count)
+
+	rows := [][]int{
+		{8,7,5,7},
+		{5,4,3,3},
+		{3,3,2,3},
+		{4,3,2,2},
+		{3,3,2,2},
+		{3,4,2,2},
+		{4,5,2},
+		{3,5,1},
+		{4,3,2},
+		{3,4,2},
+		{4,4,2},
+		{3,6,2},
+		{3,2,3,1},
+		{4,3,4,2},
+		{3,2,3,2},
+		{6,5},
+		{4,5},
+		{3,3},
+		{3,3},
+		{1,1},
+	}
+	cols := [][]int{
+		{1},
+		{1},
+		{2},
+		{4},
+		{7},
+		{9},
+		{2,8},
+		{1,8},
+		{8},
+		{1,9},
+		{2,7},
+		{3,4},
+		{6,4},
+		{8,5},
+		{1,11},
+		{1,7},
+		{8},
+		{1,4,8},
+		{6,8},
+		{4,7},
+		{2,4},
+		{1,4},
+		{5},
+		{1,4},
+		{1,5},
+		{7},
+		{5},
+		{3},
+		{1},
+		{1},
+	}
+	nonogram := puzzle.NewNonogramPuzzle(rows, cols)
+	p3 := Printer{0, 10000, nonogram}
+	s3 := Settings{&p3, &DecideFirst{}}
+	nonogram.Solve(s3)
+	fmt.Printf("Decisions made: %d\n", p3.count)
 }
