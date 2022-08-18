@@ -148,21 +148,16 @@ func (c nonogramConstraint) Apply(all, dirty []*csp.Decision) bool {
 			if !ds[i].Possible(1) {
 				return
 			}
-		}
-		if len(ds) > lengths[0] && !ds[lengths[0]].Possible(0) {
-			return
-		}
-		for i := 0; i < lengths[0]; i++ {
 			b.Push(1)
+			defer b.Pop()
 		}
-		forward := lengths[0]
 		if len(ds) > lengths[0] {
+			if !ds[lengths[0]].Possible(0) {
+				return
+			}
 			b.Push(0)
-			forward++
-		}
-		f(lengths[1:], ds[forward:])
-		for i := 0; i < forward; i++ {
-			b.Pop()
+			defer b.Pop()
+			f(lengths[1:], ds[lengths[0]+1:])
 		}
 	}
 	f(c.lengths, all)
