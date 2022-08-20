@@ -118,7 +118,6 @@ func (b *BuildupSet) Pop() {
 }
 
 func (b *BuildupSet) Export(decisions []*csp.Decision) {
-	// TODO(dneal): implement
 	for i, s := range b.possibleSets {
 		decisions[i].RestrictToSet(s)
 	}

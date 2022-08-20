@@ -255,6 +255,10 @@ func (p *Problem) Set(i int, val int) {
 	p.decisions[i].RestrictTo(val)
 }
 
+func (p *Problem) Get(i int) *Decision {
+	return p.decisions[i]
+}
+
 func (p *Problem) AddGroup(group []int, constraint ConstraintChecker) {
 	g := Group{constraint: constraint}
 	for _, d := range group {

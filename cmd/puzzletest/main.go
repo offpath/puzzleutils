@@ -49,6 +49,7 @@ func (dec *DecideMinMin) Decide(decisions []*csp.Decision, groups []*csp.Group) 
 type Printer struct {
 	count int
 	multiple int
+	p *puzzle.GridPuzzle
 }
 
 func (s *Printer) MakeDecision(p *csp.Problem) {
@@ -59,7 +60,7 @@ func (s *Printer) MakeDecision(p *csp.Problem) {
 }
 
 func (s *Printer) CaptureSolution(p *csp.Problem) {
-	//p.Print()
+	s.p.Print()
 }
 
 type Settings struct {
@@ -96,7 +97,7 @@ func main() {
 			"..2.1...." +
 			"....4...9")
 
-	p0 := Printer{0, 100000}
+	p0 := Printer{0, 100000, sudoku0}
 	s0 := Settings{&p0, &DecideFirst{}}
 	sudoku0.Solve(s0)
 	fmt.Printf("Decisions made: %d\n", p0.count)
@@ -113,7 +114,7 @@ func main() {
 			"..2.1...." +
 			"....4...9")
 
-	p1 := Printer{0, 100000}
+	p1 := Printer{0, 100000, sudoku1}
 	s1 := Settings{&p1, &DecideMin{}}
 	sudoku1.Solve(s1)
 	fmt.Printf("Decisions made: %d\n", p1.count)	
@@ -130,8 +131,8 @@ func main() {
 			"..2.1...." +
 			"....4...9")
 
-	p2 := Printer{0, 100000}
+	p2 := Printer{0, 100000, sudoku2}
 	s2 := Settings{&p2, &DecideMinMin{}}
 	sudoku2.Solve(s2)
-	fmt.Printf("Decisions made: %d\n", p2.count)	
+	fmt.Printf("Decisions made: %d\n", p2.count)
 }

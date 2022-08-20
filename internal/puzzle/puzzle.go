@@ -1,7 +1,7 @@
 package puzzle
 
 import (
-	_ "fmt"
+	"fmt"
 	
 	"puzzleutils/internal/csp"
 	"puzzleutils/internal/constraints"
@@ -89,6 +89,25 @@ func (p *GridPuzzle) RowGroups() [][]GridEntry {
 	return result
 }
 
+func (p *GridPuzzle) ToString() string {
+	result := ""
+	for i := 0; i < p.height; i++ {
+		for j := 0; j < p.width; j++ {
+			v := p.Get(i * p.width + j).StringValue()
+			if v == "" {
+				v = " "
+			}
+			result += v
+		}
+		result += "\n"
+	}
+	return result
+}
+
+func (p *GridPuzzle) Print() {
+	fmt.Print(p.ToString())
+}
+
 func NewSudokuPuzzle() *GridPuzzle {
 	p := NewGridPuzzle(9, 9, []string{"1", "2", "3", "4", "5", "6", "7", "8", "9"})
 	for _, g := range p.ColumnGroups() {
@@ -101,6 +120,64 @@ func NewSudokuPuzzle() *GridPuzzle {
 		for j := 0; j < 3; j++ {
 			p.AddGroup(p.RectGroup(i*3, j*3, 3, 3), constraints.UniqueCovering())
 		}
+	}
+	return p
+}
+
+type nonogramConstraint struct{
+	lengths []int
+}
+func (c nonogramConstraint) Init(all []*csp.Decision, size int){}
+func (c nonogramConstraint) Apply(all, dirty []*csp.Decision) bool {
+	b := constraints.NewBuildupSet(len(all))
+	var f func(lengths []int, ds []*csp.Decision)
+	f = func(lengths []int, ds []*csp.Decision) {
+		if len(ds) == 0 {
+			return
+		}
+		sum := len(lengths) - 1
+		for _, n := range lengths {
+			sum += n
+		}
+		if sum > len(ds) {
+			return
+		}
+		if ds[0].Possible(0) {
+			b.Push(0)
+			f(lengths, ds[1:])
+			b.Pop()
+		}
+		if len(lengths) == 0 {
+			return
+		}
+		for i := 0; i < lengths[0]; i++ {
+			if !ds[i].Possible(1) {
+				return
+			}
+			b.Push(1)
+			defer b.Pop()
+		}
+		if len(ds) > lengths[0] {
+			if !ds[lengths[0]].Possible(0) {
+				return
+			}
+			b.Push(0)
+			defer b.Pop()
+			f(lengths[1:], ds[lengths[0]+1:])
+		}
+	}
+	f(c.lengths, all)
+	b.Export(all)
+	return true
+}
+
+func NewNonogramPuzzle(rows, cols [][]int) *GridPuzzle {
+	p := NewGridPuzzle(len(cols), len(rows), []string{".", "X"})
+	for i, g := range p.RowGroups() {
+		p.AddGroup(g, nonogramConstraint{rows[i]})
+	}
+	for i, g := range p.ColumnGroups() {
+		p.AddGroup(g, nonogramConstraint{cols[i]})
 	}
 	return p
 }
