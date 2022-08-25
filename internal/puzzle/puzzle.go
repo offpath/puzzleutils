@@ -9,10 +9,11 @@ import (
 
 type Puzzle struct {
 	*csp.Problem
+	valueSet []string
 }
 
 func NewPuzzle(size int, valueSet []string) *Puzzle {
-	return &Puzzle{csp.NewProblem(size, valueSet)}
+	return &Puzzle{csp.NewProblem(size, len(valueSet)), valueSet}
 }
 
 func (p *Puzzle) AllGroup() []int {
@@ -25,7 +26,7 @@ func (p *Puzzle) AllGroup() []int {
 
 func (p *Puzzle) InvertSet() map[string]int {
 	invertSet := map[string]int{}
-	for i, v := range p.ValueSet() {
+	for i, v := range p.valueSet {
 		invertSet[v] = i
 	}
 	return invertSet
@@ -89,13 +90,15 @@ func (p *GridPuzzle) RowGroups() [][]GridEntry {
 	return result
 }
 
+
+
 func (p *GridPuzzle) ToString() string {
 	result := ""
 	for i := 0; i < p.height; i++ {
 		for j := 0; j < p.width; j++ {
-			v := p.Get(i * p.width + j).StringValue()
-			if v == "" {
-				v = " "
+			v := " "
+			if val := p.Get(i * p.width + j).Value(); val >= 0 {
+				v = p.valueSet[val]
 			}
 			result += v
 		}

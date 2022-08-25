@@ -37,14 +37,6 @@ func (d *Decision) Value() int {
 	return -1
 }
 
-func (d *Decision) StringValue() string {
-	if v := d.Value(); v < 0 {
-		return ""
-	} else {
-		return d.p.valueSet[v]
-	}
-}
-
 // Count returns the number of remaining options for the decision.
 func (d *Decision) Count() int {
 	return len(d.possibilities)
@@ -134,7 +126,7 @@ type undoRestricts []int
 // A Problem captures the decisions and groups, as well as any
 // ephemeral state used to solve the problem.
 type Problem struct {
-	valueSet []string
+	valueSize int
 	decisions []*Decision
 	groups []*Group
 	undoStack []map[*Decision]undoRestricts
@@ -146,8 +138,8 @@ func (p *Problem) Size() int {
 	return len(p.decisions)
 }
 
-func (p *Problem) ValueSet() []string {
-	return p.valueSet
+func (p *Problem) ValueSize() int {
+	return p.valueSize
 }
 
 func (p *Problem) check() bool {
@@ -225,7 +217,7 @@ func (p *Problem) recSolve(s Settings) bool {
 		return true
 	}
 	d := s.Decide(ds, p.groups)
-	for i := 0; i < len(p.valueSet); i++ {  // Improve by iterating over available values for d?
+	for i := 0; i < p.valueSize; i++ {  // Improve by iterating over available values for d?
 		s.MakeDecision(p)
 		p.snapshot()
 		d.RestrictTo(i)
@@ -240,11 +232,7 @@ func (p *Problem) recSolve(s Settings) bool {
 // Print the current state of the problem. 
 func (p *Problem) Print() {
 	for i, d := range p.decisions {
-		val := ""
-		if v := d.Value(); v >= 0 {
-			val = p.valueSet[v]
-		}
-		fmt.Printf("%d: %s\n", i, val)
+		fmt.Printf("%d: %d\n", i, d.Value())
 	}
 	fmt.Println("")
 }
@@ -265,17 +253,17 @@ func (p *Problem) AddGroup(group []int, constraint ConstraintChecker) {
 		g.decisions = append(g.decisions, p.decisions[d])
 		p.decisions[d].groups = append(p.decisions[d].groups, &g)
 	}
-	constraint.Init(g.decisions, len(p.valueSet))
+	constraint.Init(g.decisions, p.valueSize)
 	p.groups = append(p.groups, &g)
 }
 
-func NewProblem(size int, valueSet []string) *Problem {
+func NewProblem(size int, valueSize int) *Problem {
 	p := Problem{
-		valueSet: valueSet,
+		valueSize: valueSize,
 		dirty: map[*Decision]bool{},
 	}
 	for i := 0; i < size; i++ {
-		p.decisions = append(p.decisions, newDecision(len(valueSet), &p))
+		p.decisions = append(p.decisions, newDecision(valueSize, &p))
 	}
 	return &p
 }
