@@ -8,7 +8,7 @@ import (
 )
 
 type Puzzle struct {
-	*csp.Problem
+	problem *csp.Problem
 	valueSet []string
 }
 
@@ -18,7 +18,7 @@ func NewPuzzle(size int, valueSet []string) *Puzzle {
 
 func (p *Puzzle) AllGroup() []int {
 	var result []int
-	for i := 0; i < p.Size(); i++ {
+	for i := 0; i < p.problem.Size(); i++ {
 		result = append(result, i)
 	}
 	return result
@@ -36,9 +36,13 @@ func (p *Puzzle) Init(start string) {
 	invertSet := p.InvertSet()
 	for i, c := range start {
 		if v, ok := invertSet[string(c)]; ok {
-			p.Set(i, v)
+			p.problem.Set(i, v)
 		}
 	}
+}
+
+func (p *Puzzle) Solve(s csp.Settings) {
+	p.problem.Solve(s)
 }
 
 type GridEntry struct {
@@ -61,7 +65,7 @@ func (p *GridPuzzle) AddGroup(group []GridEntry, constraint csp.ConstraintChecke
 	for _, e := range group {
 		flatGroup = append(flatGroup, e.Row * p.width + e.Col)
 	}
-	p.Puzzle.AddGroup(flatGroup, constraint)
+	p.Puzzle.problem.AddGroup(flatGroup, constraint)
 }
 
 func (p *GridPuzzle) RectGroup(row, col, height, width int) []GridEntry {
@@ -97,7 +101,7 @@ func (p *GridPuzzle) ToString() string {
 	for i := 0; i < p.height; i++ {
 		for j := 0; j < p.width; j++ {
 			v := " "
-			if val := p.Get(i * p.width + j).Value(); val >= 0 {
+			if val := p.problem.Get(i * p.width + j).Value(); val >= 0 {
 				v = p.valueSet[val]
 			}
 			result += v

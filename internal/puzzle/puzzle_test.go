@@ -70,7 +70,7 @@ func TestNonogram(t *testing.T) {
 		{1},
 	}
 	nonogram := NewNonogramPuzzle(rows, cols)
-	nonogram.Solve(&settings{})
+	nonogram.problem.Solve(&settings{})
 	got := nonogram.ToString()
 	want := `XXXXXXXX.XXXXXXX.XXXXX.XXXXXXX
 ..XXXXX...XXXX....XXX....XXX..
