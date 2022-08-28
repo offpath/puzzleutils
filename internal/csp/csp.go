@@ -116,7 +116,7 @@ type Decider interface {
 	Decide(d []*Decision, g []*Group) *Decision
 }
 
-type Settings interface {
+type Settings struct {
 	Printer
 	Decider
 }

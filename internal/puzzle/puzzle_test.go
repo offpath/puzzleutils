@@ -4,15 +4,13 @@ import (
 	"testing"
 
 	"puzzleutils/internal/csp"
+	"puzzleutils/internal/decide"
 )
 
-// TODO(dneal): Cleanup once we have standard settings.
-type settings struct {}
-func (s *settings) MakeDecision(p *csp.Problem){}
-func (s *settings) CaptureSolution(p *csp.Problem){}
-func (s *settings) Decide(d []*csp.Decision, g []*csp.Group) *csp.Decision {
-	return d[0]
-}
+// TODO(dneal): Cleanup once we have standard printers.
+type printer struct {}
+func (pr *printer) MakeDecision(p *csp.Problem){}
+func (pr *printer) CaptureSolution(p *csp.Problem){}
 
 func TestNonogram(t *testing.T) {
 	rows := [][]int{
@@ -70,7 +68,7 @@ func TestNonogram(t *testing.T) {
 		{1},
 	}
 	nonogram := NewNonogramPuzzle(rows, cols)
-	nonogram.problem.Solve(&settings{})
+	nonogram.problem.Solve(csp.Settings{&printer{}, &decide.First{}})
 	got := nonogram.ToString()
 	want := `XXXXXXXX.XXXXXXX.XXXXX.XXXXXXX
 ..XXXXX...XXXX....XXX....XXX..
