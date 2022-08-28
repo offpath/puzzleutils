@@ -101,12 +101,18 @@ type ConstraintChecker interface {
 	Apply(all, dirty []*Decision) bool
 }
 
-// A Printer is an object that will be called at certain critical
-// points during a solve, for example when a solution has been
-// found. In spite of the name, it may also simply memorize,
-// summarize, sample, or do anything else really.
-type Printer interface {
-	MakeDecision(p *Problem)
+
+// A DecisionTracker is an interface that is called during a solve
+// whenever a decision is made. Its primary purpose at this time is to
+// allow the caller to track progress and count decisions.
+type DecisionTracker interface {
+	CaptureDecision(p *Problem)
+}
+
+// A SolutionTracker is an interface that is called during a solve
+// whenever a solution is found. It can be use to print, record,
+// summarize, or sample solutions.
+type SolutionTracker interface {
 	CaptureSolution(p *Problem)
 }
 
@@ -117,7 +123,8 @@ type Decider interface {
 }
 
 type Settings struct {
-	Printer
+	DecisionTracker
+	SolutionTracker
 	Decider
 }
 
@@ -213,12 +220,16 @@ func (p *Problem) recSolve(s Settings) bool {
 		}
 	}
 	if len(ds) == 0 {
-		s.CaptureSolution(p)
+		if s.SolutionTracker != nil {
+			s.CaptureSolution(p)
+		}
 		return true
 	}
 	d := s.Decide(ds, p.groups)
 	for i := 0; i < p.valueSize; i++ {  // Improve by iterating over available values for d?
-		s.MakeDecision(p)
+		if s.DecisionTracker != nil {
+			s.CaptureDecision(p)
+		}
 		p.snapshot()
 		d.RestrictTo(i)
 		if p.check() && p.recSolve(s) {

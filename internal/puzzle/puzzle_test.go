@@ -7,11 +7,6 @@ import (
 	"puzzleutils/internal/decide"
 )
 
-// TODO(dneal): Cleanup once we have standard printers.
-type printer struct {}
-func (pr *printer) MakeDecision(p *csp.Problem){}
-func (pr *printer) CaptureSolution(p *csp.Problem){}
-
 func TestNonogram(t *testing.T) {
 	rows := [][]int{
 		{8,7,5,7},
@@ -68,7 +63,7 @@ func TestNonogram(t *testing.T) {
 		{1},
 	}
 	nonogram := NewNonogramPuzzle(rows, cols)
-	nonogram.problem.Solve(csp.Settings{&printer{}, &decide.First{}})
+	nonogram.problem.Solve(csp.Settings{Decider: &decide.First{}})
 	got := nonogram.ToString()
 	want := `XXXXXXXX.XXXXXXX.XXXXX.XXXXXXX
 ..XXXXX...XXXX....XXX....XXX..
