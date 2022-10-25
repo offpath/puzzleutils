@@ -11,8 +11,8 @@ type Value struct {
 	i int
 }
 
-func (v *Value) Int() int {
-	return v.i
+func (val *Value) Int() int {
+	return val.i
 }
 
 type ValueSet map[*Value]bool
@@ -34,6 +34,10 @@ func (v *Variable) Set(vs ValueSet) {
 	v.vs = vs
 }
 
+func (v *Variable) Value(val *Value) {
+	v.vs = ValueSet{val: true}
+}
+
 type Puzzle2 struct {
 	intValues map[int]*Value
 	variables []*Variable
@@ -48,12 +52,12 @@ func NewPuzzle2() *Puzzle2 {
 }
 
 func (p *Puzzle2) GetIntValue(i int) *Value {
-	if v, ok := p.intValues[i]; ok {
-		return v
+	if val, ok := p.intValues[i]; ok {
+		return val
 	}
-	v := &Value{i}
-	p.intValues[i] = v
-	return v
+	val := &Value{i}
+	p.intValues[i] = val
+	return val
 }
 
 func (p *Puzzle2) GetIntRange(min, max int) ValueSet {
@@ -101,6 +105,10 @@ func (g *Grid) Fill(vs ValueSet) {
 			g.variables[i][j].Set(vs.Clone())
 		}
 	}
+}
+
+func (g *Grid) Get(row int, col int) *Variable {
+	return g.variables[row][col]
 }
 
 func NewSudoku(p *Puzzle2) *Grid {
