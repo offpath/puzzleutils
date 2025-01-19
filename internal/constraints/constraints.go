@@ -2,8 +2,8 @@ package constraints
 
 import (
 	_ "fmt"
-	
-	"puzzleutils/internal/csp"
+
+	"github.com/offpath/puzzleutils/internal/csp"
 )
 
 func Unique() csp.ConstraintChecker {
@@ -22,8 +22,9 @@ func Set(s []int) csp.ConstraintChecker {
 	return set{s}
 }
 
-type unique struct {}
-func (c unique) Init(all []*csp.Decision, size int){}
+type unique struct{}
+
+func (c unique) Init(all []*csp.Decision, size int) {}
 func (c unique) Apply(all, dirty []*csp.Decision) bool {
 	for _, d := range dirty {
 		if v := d.Value(); v >= 0 {
@@ -37,7 +38,8 @@ func (c unique) Apply(all, dirty []*csp.Decision) bool {
 	return true
 }
 
-type uniqueCovering struct { size int }
+type uniqueCovering struct{ size int }
+
 func (c *uniqueCovering) Init(all []*csp.Decision, size int) {
 	c.size = size
 }
@@ -66,8 +68,9 @@ func (c *uniqueCovering) Apply(all, dirty []*csp.Decision) bool {
 	return true
 }
 
-type equal struct {}
-func (c equal) Init(all []*csp.Decision, size int){}
+type equal struct{}
+
+func (c equal) Init(all []*csp.Decision, size int) {}
 func (c equal) Apply(all, dirty []*csp.Decision) bool {
 	// TODO(dneal): fill this in.
 	return true
@@ -76,6 +79,7 @@ func (c equal) Apply(all, dirty []*csp.Decision) bool {
 type set struct {
 	s []int
 }
+
 func (c set) Init(all []*csp.Decision, size int) {
 
 }
@@ -86,7 +90,7 @@ func (c set) Apply(all, dirty []*csp.Decision) bool {
 
 type BuildupSet struct {
 	size, cursor int
-	values []int
+	values       []int
 	possibleSets []map[int]bool
 }
 

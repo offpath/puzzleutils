@@ -2,13 +2,13 @@ package puzzle
 
 import (
 	"fmt"
-	
-	"puzzleutils/internal/csp"
-	"puzzleutils/internal/constraints"
+
+	"github.com/offpath/puzzleutils/internal/constraints"
+	"github.com/offpath/puzzleutils/internal/csp"
 )
 
 type Puzzle struct {
-	problem *csp.Problem
+	problem  *csp.Problem
 	valueSet []string
 }
 
@@ -52,18 +52,18 @@ type GridEntry struct {
 
 type GridPuzzle struct {
 	*Puzzle
-	width int
+	width  int
 	height int
 }
 
 func NewGridPuzzle(width int, height int, valueSet []string) *GridPuzzle {
-	return &GridPuzzle{NewPuzzle(width * height, valueSet), width, height}
+	return &GridPuzzle{NewPuzzle(width*height, valueSet), width, height}
 }
 
 func (p *GridPuzzle) AddGroup(group []GridEntry, constraint csp.ConstraintChecker) {
 	var flatGroup []int
 	for _, e := range group {
-		flatGroup = append(flatGroup, e.Row * p.width + e.Col)
+		flatGroup = append(flatGroup, e.Row*p.width+e.Col)
 	}
 	p.Puzzle.problem.AddGroup(flatGroup, constraint)
 }
@@ -72,7 +72,7 @@ func (p *GridPuzzle) RectGroup(row, col, height, width int) []GridEntry {
 	var result []GridEntry
 	for i := 0; i < height; i++ {
 		for j := 0; j < width; j++ {
-			result = append(result, GridEntry{row+i,col+j})
+			result = append(result, GridEntry{row + i, col + j})
 		}
 	}
 	return result
@@ -94,14 +94,12 @@ func (p *GridPuzzle) RowGroups() [][]GridEntry {
 	return result
 }
 
-
-
 func (p *GridPuzzle) ToString() string {
 	result := ""
 	for i := 0; i < p.height; i++ {
 		for j := 0; j < p.width; j++ {
 			v := " "
-			if val := p.problem.Get(i * p.width + j).Value(); val >= 0 {
+			if val := p.problem.Get(i*p.width + j).Value(); val >= 0 {
 				v = p.valueSet[val]
 			}
 			result += v
@@ -131,10 +129,11 @@ func NewSudokuPuzzle() *GridPuzzle {
 	return p
 }
 
-type nonogramConstraint struct{
+type nonogramConstraint struct {
 	lengths []int
 }
-func (c nonogramConstraint) Init(all []*csp.Decision, size int){}
+
+func (c nonogramConstraint) Init(all []*csp.Decision, size int) {}
 func (c nonogramConstraint) Apply(all, dirty []*csp.Decision) bool {
 	b := constraints.NewBuildupSet(len(all))
 	var f func(lengths []int, ds []*csp.Decision)

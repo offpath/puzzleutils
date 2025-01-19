@@ -3,16 +3,18 @@ package main
 import (
 	"fmt"
 
-	"puzzleutils/internal/csp"
-	"puzzleutils/internal/puzzle"
+	"github.com/offpath/puzzleutils/internal/csp"
+	"github.com/offpath/puzzleutils/internal/puzzle"
 )
 
-type DecideFirst struct {}
+type DecideFirst struct{}
+
 func (dec *DecideFirst) Decide(d []*csp.Decision, g []*csp.Group) *csp.Decision {
 	return d[0]
 }
 
-type DecideMin struct {}
+type DecideMin struct{}
+
 func (dec *DecideMin) Decide(d []*csp.Decision, g []*csp.Group) *csp.Decision {
 	min := d[0]
 	for i := 1; i < len(d); i++ {
@@ -23,7 +25,8 @@ func (dec *DecideMin) Decide(d []*csp.Decision, g []*csp.Group) *csp.Decision {
 	return min
 }
 
-type DecideMinMin struct {}
+type DecideMinMin struct{}
+
 func (dec *DecideMinMin) Decide(decisions []*csp.Decision, groups []*csp.Group) *csp.Decision {
 	var result *csp.Decision
 	groupMin := -1
@@ -47,14 +50,14 @@ func (dec *DecideMinMin) Decide(decisions []*csp.Decision, groups []*csp.Group) 
 }
 
 type Printer struct {
-	count int
+	count    int
 	multiple int
-	p *puzzle.GridPuzzle
+	p        *puzzle.GridPuzzle
 }
 
 func (s *Printer) MakeDecision(p *csp.Problem) {
 	s.count++
-	if s.count % s.multiple == 0 {
+	if s.count%s.multiple == 0 {
 		fmt.Printf("Count = %d\n", s.count)
 	}
 }
@@ -68,23 +71,21 @@ type Settings struct {
 	csp.Decider
 }
 
-
-
 func main() {
 	fmt.Println("Hello World!!")
 	/*
-	sudoku.Init(
-		"53..7...." +
-			"6..195..." +
-			".98....6." +
-			"8...6...3" +
-			"4..8.3..1" +
-			"7...2...6" +
-			".6....28." +
-			"...419..5" +
-			"....8..79")
+		sudoku.Init(
+			"53..7...." +
+				"6..195..." +
+				".98....6." +
+				"8...6...3" +
+				"4..8.3..1" +
+				"7...2...6" +
+				".6....28." +
+				"...419..5" +
+				"....8..79")
 	*/
-	
+
 	sudoku0 := puzzle.NewSudokuPuzzle()
 	sudoku0.Init(
 		"........." +
@@ -117,7 +118,7 @@ func main() {
 	p1 := Printer{0, 100000, sudoku1}
 	s1 := Settings{&p1, &DecideMin{}}
 	sudoku1.Solve(s1)
-	fmt.Printf("Decisions made: %d\n", p1.count)	
+	fmt.Printf("Decisions made: %d\n", p1.count)
 
 	sudoku2 := puzzle.NewSudokuPuzzle()
 	sudoku2.Init(

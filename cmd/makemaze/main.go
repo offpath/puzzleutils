@@ -1,7 +1,7 @@
 package main
 
 import (
-	"puzzleutils/internal/mazecreate"
+	"github.com/offpath/puzzleutils/internal/mazecreate"
 )
 
 func main() {
