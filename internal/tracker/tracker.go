@@ -3,7 +3,7 @@ package tracker
 import (
 	"fmt"
 
-	"puzzleutils/internal/csp"
+	"github.com/offpath/puzzleutils/internal/csp"
 )
 
 func PrintEveryN(n int) csp.DecisionTracker {
@@ -15,28 +15,28 @@ func PrintEveryLogN(n int) csp.DecisionTracker {
 }
 
 type printEveryN struct {
-	count int
+	count    int
 	multiple int
 }
 
 func (pr *printEveryN) CaptureDecision(p *csp.Problem) {
 	pr.count++
-	if pr.count % pr.multiple == 0 {
+	if pr.count%pr.multiple == 0 {
 		fmt.Printf("Count = %d\n", pr.count)
 	}
 }
 
 type printEveryLogN struct {
-	count int
+	count    int
 	multiple int
-	next int
+	next     int
 }
 
 func (pr *printEveryLogN) CaptureDecision(p *csp.Problem) {
 	pr.count++
-	if pr.count % pr.next == 0 {
+	if pr.count%pr.next == 0 {
 		fmt.Printf("Count = %d\n", pr.count)
-		if pr.count / pr.next == pr.multiple {
+		if pr.count/pr.next == pr.multiple {
 			pr.next = pr.next * pr.multiple
 		}
 	}
