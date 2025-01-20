@@ -1,15 +1,17 @@
 package decide
 
 import (
-	"puzzleutils/internal/csp"
+	"github.com/offpath/puzzleutils/internal/csp"
 )
 
-type First struct {}
+type First struct{}
+
 func (dec *First) Decide(d []*csp.Decision, g []*csp.Group) *csp.Decision {
 	return d[0]
 }
 
-type Min struct {}
+type Min struct{}
+
 func (dec *Min) Decide(d []*csp.Decision, g []*csp.Group) *csp.Decision {
 	min := d[0]
 	for i := 1; i < len(d); i++ {
@@ -20,7 +22,8 @@ func (dec *Min) Decide(d []*csp.Decision, g []*csp.Group) *csp.Decision {
 	return min
 }
 
-type MinMin struct {}
+type MinMin struct{}
+
 func (dec *MinMin) Decide(decisions []*csp.Decision, groups []*csp.Group) *csp.Decision {
 	var result *csp.Decision
 	groupMin := -1
@@ -42,4 +45,3 @@ func (dec *MinMin) Decide(decisions []*csp.Decision, groups []*csp.Group) *csp.D
 	}
 	return result
 }
-
