@@ -18,7 +18,7 @@ func Equal() csp.ConstraintChecker {
 	return equal{}
 }
 
-func Set(s []int) csp.ConstraintChecker {
+func Set(s map[int]bool) csp.ConstraintChecker {
 	return set{s}
 }
 
@@ -72,19 +72,26 @@ type equal struct{}
 
 func (c equal) Init(all []*csp.Decision, size int) {}
 func (c equal) Apply(all, dirty []*csp.Decision) bool {
-	// TODO(dneal): fill this in.
+	for _, d := range dirty {
+		for _, d2 := range all {
+			if d2 != d {
+				d2.RestrictToEqual(d)
+			}
+		}
+	}
 	return true
 }
 
 type set struct {
-	s []int
+	s map[int]bool
 }
 
 func (c set) Init(all []*csp.Decision, size int) {
-
+	for _, d := range all {
+		d.RestrictToSet(c.s)
+	}
 }
 func (c set) Apply(all, dirty []*csp.Decision) bool {
-
 	return true
 }
 

@@ -10,14 +10,14 @@ import (
 // single grid square in a sudoku or similar puzzle.
 type Decision struct {
 	possibilities map[int]bool
-	groups []*Group
-	p *Problem
+	groups        []*Group
+	p             *Problem
 }
 
 func newDecision(size int, p *Problem) *Decision {
 	result := Decision{
 		possibilities: map[int]bool{},
-		p: p,
+		p:             p,
 	}
 	for i := 0; i < size; i++ {
 		result.possibilities[i] = true
@@ -78,6 +78,10 @@ func (d *Decision) RestrictToSet(s map[int]bool) {
 	}
 }
 
+func (d *Decision) RestrictToEqual(d2 *Decision) {
+	d.RestrictToSet(d2.possibilities)
+}
+
 func (d *Decision) Possible(i int) bool {
 	return d.possibilities[i]
 }
@@ -86,7 +90,7 @@ func (d *Decision) Possible(i int) bool {
 // constraint, for example a row or column in a sudoku puzzle with a
 // uniqueness constraint.
 type Group struct {
-	decisions []*Decision
+	decisions  []*Decision
 	constraint ConstraintChecker
 }
 
@@ -100,7 +104,6 @@ type ConstraintChecker interface {
 	Init(all []*Decision, size int)
 	Apply(all, dirty []*Decision) bool
 }
-
 
 // A DecisionTracker is an interface that is called during a solve
 // whenever a decision is made. Its primary purpose at this time is to
@@ -128,17 +131,17 @@ type Settings struct {
 	Decider
 }
 
-type undoRestricts []int 
+type undoRestricts []int
 
 // A Problem captures the decisions and groups, as well as any
 // ephemeral state used to solve the problem.
 type Problem struct {
 	valueSize int
 	decisions []*Decision
-	groups []*Group
+	groups    []*Group
 	undoStack []map[*Decision]undoRestricts
-	dirty map[*Decision]bool
-	conflict bool
+	dirty     map[*Decision]bool
+	conflict  bool
 }
 
 func (p *Problem) Size() int {
@@ -155,7 +158,7 @@ func (p *Problem) check() bool {
 		p.conflict = false
 		return false
 	}
-	for ; len(p.dirty) > 0; {
+	for len(p.dirty) > 0 {
 		groups := map[*Group][]*Decision{}
 		for d, _ := range p.dirty {
 			for _, g := range d.groups {
@@ -226,7 +229,7 @@ func (p *Problem) recSolve(s Settings) bool {
 		return true
 	}
 	d := s.Decide(ds, p.groups)
-	for i := 0; i < p.valueSize; i++ {  // Improve by iterating over available values for d?
+	for i := 0; i < p.valueSize; i++ { // Improve by iterating over available values for d?
 		if s.DecisionTracker != nil {
 			s.CaptureDecision(p)
 		}
@@ -240,7 +243,7 @@ func (p *Problem) recSolve(s Settings) bool {
 	return false
 }
 
-// Print the current state of the problem. 
+// Print the current state of the problem.
 func (p *Problem) Print() {
 	for i, d := range p.decisions {
 		fmt.Printf("%d: %d\n", i, d.Value())
@@ -271,11 +274,10 @@ func (p *Problem) AddGroup(group []int, constraint ConstraintChecker) {
 func NewProblem(size int, valueSize int) *Problem {
 	p := Problem{
 		valueSize: valueSize,
-		dirty: map[*Decision]bool{},
+		dirty:     map[*Decision]bool{},
 	}
 	for i := 0; i < size; i++ {
 		p.decisions = append(p.decisions, newDecision(valueSize, &p))
 	}
 	return &p
 }
-
