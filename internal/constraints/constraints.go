@@ -22,6 +22,10 @@ func Set(s map[int]bool) csp.ConstraintChecker {
 	return set{s}
 }
 
+func SetCountCovering(s map[int]int) csp.ConstraintChecker {
+	return setCountCovering{s}
+}
+
 type unique struct{}
 
 func (c unique) Init(all []*csp.Decision, size int) {}
@@ -92,6 +96,48 @@ func (c set) Init(all []*csp.Decision, size int) {
 	}
 }
 func (c set) Apply(all, dirty []*csp.Decision) bool {
+	return true
+}
+
+// TODO(dneal): Reimplement uniqueCovering using countCovering to test.
+type setCountCovering struct {
+	s map[int]int
+}
+
+func (c setCountCovering) Init(all []*csp.Decision, size int) {
+	var s map[int]bool
+	for _, item := range c.s {
+		s[item] = true
+	}
+	for _, d := range all {
+		d.RestrictToSet(s)
+	}
+}
+
+func (c setCountCovering) Apply(all, dirty []*csp.Decision) bool {
+	for item, target := range c.s {
+		count := 0
+		possibleCount := 0
+		for _, d := range all {
+			if d.Possible(item) {
+				possibleCount++
+			}
+			if d.Value() == item {
+				count++
+			}
+			if possibleCount < target || count > target {
+				return false
+			}
+			if count == target {
+				for _, d2 := range all {
+					if d2.Value() != item {
+						d2.Restrict(item)
+					}
+				}
+			}
+
+		}
+	}
 	return true
 }
 
