@@ -1,6 +1,7 @@
 package puzzle
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/offpath/puzzleutils/internal/csp"
@@ -171,21 +172,7 @@ TE
 
 func TestDropquote(t *testing.T) {
 	tr := trie.New()
-	tr.Add("hello")
-	tr.Add("world")
-	tr.Add("the")
-	tr.Add("best")
-	tr.Add("is")
-	tr.Add("populated")
-	tr.Add("in")
-	tr.Add("main")
-	tr.Add("by")
-	tr.Add("people")
-	tr.Add("who")
-	tr.Add("should")
-	tr.Add("not")
-	tr.Add("exist")
-	// TODO(dneal): tr.AddFile("")
+	tr.AddFile(filepath.Join("testdata", "ospd2.txt"))
 	for _, tt := range dropquoteTests {
 		dropquote := NewDropquotePuzzle(tt.input, tr)
 		if !dropquote.Solve(csp.Settings{Decider: &decide.First{}, DecisionTracker: tracker.PrintEveryN(1)}) {
