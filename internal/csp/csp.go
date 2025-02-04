@@ -160,7 +160,7 @@ func (p *Problem) check() bool {
 	}
 	for len(p.dirty) > 0 {
 		groups := map[*Group][]*Decision{}
-		for d, _ := range p.dirty {
+		for d := range p.dirty {
 			for _, g := range d.groups {
 				groups[g] = append(groups[g], d)
 			}
@@ -229,7 +229,10 @@ func (p *Problem) recSolve(s Settings) bool {
 		return true
 	}
 	d := s.Decide(ds, p.groups)
-	for i := 0; i < p.valueSize; i++ { // Improve by iterating over available values for d?
+	for i := 0; i < p.valueSize; i++ {
+		if !d.Possible(i) {
+			continue
+		}
 		if s.DecisionTracker != nil {
 			s.CaptureDecision(p)
 		}
