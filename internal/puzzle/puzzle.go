@@ -325,6 +325,7 @@ func NewDropquotePuzzle(input string, t *trie.Trie) *Puzzle {
 	numLetters := 0
 	var cols [][]int
 	var colSets []map[int]int
+	var isCovering []bool
 	for i := 0; i < numCols; i++ {
 		cols = append(cols, nil)
 	}
@@ -355,6 +356,10 @@ func NewDropquotePuzzle(input string, t *trie.Trie) *Puzzle {
 				s[int(c)-int('A')]++
 			}
 			colSets = append(colSets, s)
+			isCovering = append(isCovering, len(line) == len(cols[len(colSets)-1]))
+			if len(colSets) == len(cols) {
+				break
+			}
 		}
 	}
 	if currentLength > 0 {
@@ -372,7 +377,7 @@ func NewDropquotePuzzle(input string, t *trie.Trie) *Puzzle {
 	}
 	for i := 0; i < numCols; i++ {
 		// TODO(dneal): Allow non-covering sets.
-		result.problem.AddGroup(cols[i], constraints.SetCount(colSets[i], true))
+		result.problem.AddGroup(cols[i], constraints.SetCount(colSets[i], isCovering[i]))
 	}
 	return result
 }

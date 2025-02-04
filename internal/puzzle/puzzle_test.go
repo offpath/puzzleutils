@@ -168,6 +168,36 @@ TE
 `,
 		want: "THEWORLDISPOPULATEDINTHEMAINBYPEOPLEWHOSHOULDNOTEXIST",
 	},
+	{
+		name: "extra letters",
+		input: `...X.....X..X.......
+..X..X...X....X..X..
+....X...X......X...X
+.....XXXXXXXXXXXXXXX
+
+OEETA
+DXHPQ
+EILZ
+IES
+WTNN
+OW
+TRHP
+OHL
+DE
+SR
+IMH
+SAO
+IUL
+NPL
+DO
+PB
+UYNQ
+OL
+TPA
+TE
+`,
+		want: "THEWORLDISPOPULATEDINTHEMAINBYPEOPLEWHOSHOULDNOTEXIST",
+	},
 }
 
 func TestDropquote(t *testing.T) {
