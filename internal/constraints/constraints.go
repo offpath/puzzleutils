@@ -5,12 +5,12 @@ import (
 	"github.com/offpath/puzzleutils/internal/trie"
 )
 
-func Unique() csp.ConstraintChecker {
-	return unique{}
+func Unique(isCovering bool) csp.ConstraintChecker {
+	return unique{isCovering}
 }
 
 func UniqueCovering() csp.ConstraintChecker {
-	return &uniqueCovering{}
+	return Unique(true)
 }
 
 func Equal() csp.ConstraintChecker {
@@ -21,15 +21,17 @@ func Set(s map[int]bool) csp.ConstraintChecker {
 	return set{s}
 }
 
-func SetCountCovering(s map[int]int) csp.ConstraintChecker {
-	return setCountCovering{s}
+func SetCount(s map[int]int, isCovering bool) csp.ConstraintChecker {
+	return setCount{s, isCovering}
 }
 
 func ValidWord(t *trie.Trie, valueSet []string) csp.ConstraintChecker {
 	return validWord{t, valueSet}
 }
 
-type unique struct{}
+type unique struct {
+	isCovering bool
+}
 
 func (c unique) Init(all []*csp.Decision, size int) {}
 func (c unique) Apply(all, dirty []*csp.Decision) bool {
@@ -42,25 +44,12 @@ func (c unique) Apply(all, dirty []*csp.Decision) bool {
 			}
 		}
 	}
-	return true
-}
-
-type uniqueCovering struct{ size int }
-
-func (c *uniqueCovering) Init(all []*csp.Decision, size int) {
-	c.size = size
-}
-func (c *uniqueCovering) Apply(all, dirty []*csp.Decision) bool {
-	for _, d := range dirty {
-		if v := d.Value(); v >= 0 {
-			for _, d2 := range all {
-				if d2 != d {
-					d2.Restrict(v)
-				}
-			}
-		}
+	// Break early if we're not checking for a covering set.
+	if !c.isCovering {
+		return true
 	}
-	for i := 0; i < c.size; i++ {
+	// If this is a covering set, there are exactly as many values as decisions.
+	for i := 0; i < len(all); i++ {
 		found := false
 		for _, d := range all {
 			if d.Possible(i) {
@@ -102,12 +91,12 @@ func (c set) Apply(all, dirty []*csp.Decision) bool {
 	return true
 }
 
-// TODO(dneal): Reimplement uniqueCovering using countCovering to test.
-type setCountCovering struct {
-	s map[int]int
+type setCount struct {
+	s          map[int]int
+	isCovering bool
 }
 
-func (c setCountCovering) Init(all []*csp.Decision, size int) {
+func (c setCount) Init(all []*csp.Decision, size int) {
 	s := map[int]bool{}
 	for item := range c.s {
 		s[item] = true
@@ -117,7 +106,7 @@ func (c setCountCovering) Init(all []*csp.Decision, size int) {
 	}
 }
 
-func (c setCountCovering) Apply(all, dirty []*csp.Decision) bool {
+func (c setCount) Apply(all, dirty []*csp.Decision) bool {
 	for item, target := range c.s {
 		count := 0
 		possibleCount := 0
@@ -129,7 +118,7 @@ func (c setCountCovering) Apply(all, dirty []*csp.Decision) bool {
 				count++
 			}
 		}
-		if possibleCount < target || count > target {
+		if count > target || (c.isCovering && possibleCount < target) {
 			return false
 		}
 		if count == target {

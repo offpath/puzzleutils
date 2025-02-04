@@ -245,14 +245,14 @@ func (p *GridPuzzle) Print() {
 func NewSudokuPuzzle() *GridPuzzle {
 	p := NewGridPuzzle(9, 9, []string{"1", "2", "3", "4", "5", "6", "7", "8", "9"})
 	for _, g := range p.ColumnGroups() {
-		p.AddGroup(g, constraints.UniqueCovering())
+		p.AddGroup(g, constraints.Unique(true))
 	}
 	for _, g := range p.RowGroups() {
-		p.AddGroup(g, constraints.UniqueCovering())
+		p.AddGroup(g, constraints.Unique(true))
 	}
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
-			p.AddGroup(p.RectGroup(i*3, j*3, 3, 3), constraints.UniqueCovering())
+			p.AddGroup(p.RectGroup(i*3, j*3, 3, 3), constraints.Unique(true))
 		}
 	}
 	return p
@@ -371,7 +371,8 @@ func NewDropquotePuzzle(input string, t *trie.Trie) *Puzzle {
 		offset += length
 	}
 	for i := 0; i < numCols; i++ {
-		result.problem.AddGroup(cols[i], constraints.SetCountCovering(colSets[i]))
+		// TODO(dneal): Allow non-covering sets.
+		result.problem.AddGroup(cols[i], constraints.SetCount(colSets[i], true))
 	}
 	return result
 }
