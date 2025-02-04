@@ -2,9 +2,11 @@ package puzzle
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/offpath/puzzleutils/internal/constraints"
 	"github.com/offpath/puzzleutils/internal/csp"
+	"github.com/offpath/puzzleutils/internal/trie"
 )
 
 type Value struct {
@@ -26,7 +28,7 @@ func (vs ValueSet) Clone() ValueSet {
 }
 
 type Variable struct {
-	p *Puzzle2
+	p  *Puzzle2
 	vs ValueSet
 }
 
@@ -70,7 +72,7 @@ func (p *Puzzle2) GetIntRange(min, max int) ValueSet {
 
 func (p *Puzzle2) NewVariable() *Variable {
 	result := &Variable{
-		p: p,
+		p:  p,
 		vs: ValueSet{},
 	}
 	p.variables = append(p.variables, result)
@@ -78,15 +80,15 @@ func (p *Puzzle2) NewVariable() *Variable {
 }
 
 type Grid struct {
-	rows int
-	cols int
+	rows      int
+	cols      int
 	variables [][]*Variable
 }
 
 func NewGrid(p *Puzzle2, rows int, cols int) *Grid {
 	result := &Grid{
-		rows: rows,
-		cols: cols,
+		rows:      rows,
+		cols:      cols,
 		variables: nil,
 	}
 	for i := 0; i < rows; i++ {
@@ -135,6 +137,10 @@ func (p *Puzzle) AllGroup() []int {
 	return result
 }
 
+func (p *Puzzle) ValueSet() []string {
+	return p.valueSet
+}
+
 func (p *Puzzle) InvertSet() map[string]int {
 	invertSet := map[string]int{}
 	for i, v := range p.valueSet {
@@ -152,8 +158,20 @@ func (p *Puzzle) Init(start string) {
 	}
 }
 
-func (p *Puzzle) Solve(s csp.Settings) {
-	p.problem.Solve(s)
+func (p *Puzzle) Solve(s csp.Settings) bool {
+	return p.problem.Solve(s)
+}
+
+func (p *Puzzle) ToString() string {
+	result := ""
+	for i := 0; i < p.problem.Size(); i++ {
+		v := " "
+		if val := p.problem.Get(i).Value(); val >= 0 {
+			v = p.valueSet[val]
+		}
+		result += v
+	}
+	return result
 }
 
 type GridEntry struct {
@@ -297,4 +315,63 @@ func NewNonogramPuzzle(rows, cols [][]int) *GridPuzzle {
 		p.AddGroup(g, nonogramConstraint{cols[i]})
 	}
 	return p
+}
+
+var alphabet = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+
+func NewDropquotePuzzle(input string, t *trie.Trie) *Puzzle {
+	lines := strings.Split(input, "\n")
+	numCols := len(lines[0])
+	numLetters := 0
+	var cols [][]int
+	var colSets []map[int]int
+	for i := 0; i < numCols; i++ {
+		cols = append(cols, nil)
+	}
+	var wordLengths []int
+	currentLength := 0
+	letterBanks := false
+	for _, line := range lines {
+		if line == "" && !letterBanks {
+			letterBanks = true
+			continue
+		}
+		if !letterBanks {
+			for i, c := range line {
+				if c == '.' {
+					currentLength++
+					cols[i] = append(cols[i], numLetters)
+					numLetters++
+				} else {
+					if currentLength > 0 {
+						wordLengths = append(wordLengths, currentLength)
+						currentLength = 0
+					}
+				}
+			}
+		} else {
+			s := map[int]int{}
+			for _, c := range line {
+				s[int(c)-int('A')]++
+			}
+			colSets = append(colSets, s)
+		}
+	}
+	if currentLength > 0 {
+		wordLengths = append(wordLengths, currentLength)
+	}
+	result := NewPuzzle(numLetters, alphabet)
+	offset := 0
+	for _, length := range wordLengths {
+		var group []int
+		for j := 0; j < length; j++ {
+			group = append(group, offset+j)
+		}
+		result.problem.AddGroup(group, constraints.ValidWord(t, alphabet))
+		offset += length
+	}
+	for i := 0; i < numCols; i++ {
+		result.problem.AddGroup(cols[i], constraints.SetCountCovering(colSets[i]))
+	}
+	return result
 }

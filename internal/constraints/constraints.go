@@ -1,9 +1,8 @@
 package constraints
 
 import (
-	_ "fmt"
-
 	"github.com/offpath/puzzleutils/internal/csp"
+	"github.com/offpath/puzzleutils/internal/trie"
 )
 
 func Unique() csp.ConstraintChecker {
@@ -24,6 +23,10 @@ func Set(s map[int]bool) csp.ConstraintChecker {
 
 func SetCountCovering(s map[int]int) csp.ConstraintChecker {
 	return setCountCovering{s}
+}
+
+func ValidWord(t *trie.Trie, valueSet []string) csp.ConstraintChecker {
+	return validWord{t, valueSet}
 }
 
 type unique struct{}
@@ -105,8 +108,8 @@ type setCountCovering struct {
 }
 
 func (c setCountCovering) Init(all []*csp.Decision, size int) {
-	var s map[int]bool
-	for _, item := range c.s {
+	s := map[int]bool{}
+	for item := range c.s {
 		s[item] = true
 	}
 	for _, d := range all {
@@ -125,19 +128,48 @@ func (c setCountCovering) Apply(all, dirty []*csp.Decision) bool {
 			if d.Value() == item {
 				count++
 			}
-			if possibleCount < target || count > target {
-				return false
-			}
-			if count == target {
-				for _, d2 := range all {
-					if d2.Value() != item {
-						d2.Restrict(item)
-					}
+		}
+		if possibleCount < target || count > target {
+			return false
+		}
+		if count == target {
+			for _, d2 := range all {
+				if d2.Value() != item {
+					d2.Restrict(item)
 				}
 			}
-
 		}
 	}
+	return true
+}
+
+type validWord struct {
+	t        *trie.Trie
+	valueSet []string
+}
+
+func (c validWord) Init(all []*csp.Decision, size int) {}
+
+func (c validWord) Apply(all, dirty []*csp.Decision) bool {
+	b := NewBuildupSet(len(all))
+	var f func(ds []*csp.Decision, prefix string)
+	f = func(ds []*csp.Decision, prefix string) {
+		if len(ds) == 0 {
+			return
+		}
+		for i, val := range c.valueSet {
+			if !ds[0].Possible(i) {
+				continue
+			}
+			if (len(ds) == 1 && c.t.HasWord(prefix+val)) || (len(ds) > 1 && c.t.HasPrefix(prefix+val)) {
+				b.Push(i)
+				f(ds[1:], prefix+val)
+				b.Pop()
+			}
+		}
+	}
+	f(all, "")
+	b.Export(all)
 	return true
 }
 
