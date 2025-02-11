@@ -381,3 +381,72 @@ func NewDropquotePuzzle(input string, t *trie.Trie) *Puzzle {
 	}
 	return result
 }
+
+type slitherlinkPointConstraint struct{}
+
+func (c slitherlinkPointConstraint) Init(all []*csp.Decision, size int) {}
+func (c slitherlinkPointConstraint) Apply(all, dirty []*csp.Decision) bool {
+	// TODO(dneal): Either 0 or 2 lines may surround a point
+	return true
+}
+
+type slitherlinkBoxConstraint struct{ n int }
+
+func (c slitherlinkBoxConstraint) Init(all []*csp.Decision, size int) {
+	// TODO(dneal): Special case 0?
+}
+func (c slitherlinkBoxConstraint) Apply(all, dirty []*csp.Decision) bool {
+	// TODO(dneal): Exactly c.n surrounding lines must be set
+	return true
+}
+
+type slitherlinkLoopConstraint struct{}
+
+func (c slitherlinkLoopConstraint) Init(all []*csp.Decision, size int) {}
+func (c slitherlinkLoopConstraint) Apply(all, dirty []*csp.Decision) bool {
+	// TODO(dneal): Exactly one loop is allowed
+	return true
+}
+
+type slitherlinkGrid struct {
+	numRows, numCols int
+}
+
+func (g slitherlinkGrid) numLines() int {
+	return g.numCols*(g.numRows+1) + g.numRows*(g.numCols+1)
+}
+
+func (g slitherlinkGrid) pointToLines(row, col int) []int {
+	return nil
+}
+
+func (g slitherlinkGrid) boxToLines(row, col int) []int {
+	return nil
+}
+
+func NewSlitherlinkPuzzle(input string) *Puzzle {
+	lines := strings.Split(input, "\n")
+	g := slitherlinkGrid{len(lines), len(lines[0])}
+	result := NewPuzzle(g.numLines(), []string{"0", "1"})
+	for i := 0; i <= g.numRows; i++ {
+		for j := 0; j <= g.numCols; j++ {
+			result.problem.AddGroup(g.pointToLines(i, j), slitherlinkPointConstraint{})
+		}
+	}
+	for i := 0; i < g.numRows; i++ {
+		for j := 0; j < g.numCols; j++ {
+			if lines[i][j] != '.' {
+				result.problem.AddGroup(g.boxToLines(i, j), slitherlinkBoxConstraint{int(lines[i][j] - '0')})
+			}
+		}
+	}
+	var group []int
+	for i := 0; i < g.numLines(); i++ {
+		group = append(group, i)
+	}
+	result.problem.AddGroup(group, slitherlinkLoopConstraint{})
+
+	return result
+}
+
+// TODO(dneal): Implement a slitherlink printer
