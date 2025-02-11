@@ -386,17 +386,73 @@ type slitherlinkPointConstraint struct{}
 
 func (c slitherlinkPointConstraint) Init(all []*csp.Decision, size int) {}
 func (c slitherlinkPointConstraint) Apply(all, dirty []*csp.Decision) bool {
-	// TODO(dneal): Either 0 or 2 lines may surround a point
+	// Either 0 or 2 lines may connect to a point (no crossing lines)
+	possible := 0
+	set := 0
+	for _, d := range all {
+		if d.Value() == 1 {
+			set++
+		}
+		if d.Possible(1) {
+			possible++
+		}
+	}
+	if set > 2 || (set == 1 && possible == 1) {
+		return false
+	}
+	if set == 1 && possible == 2 {
+		for _, d := range all {
+			if d.Possible(1) {
+				d.RestrictTo(1)
+			}
+		}
+	} else if possible < 2 {
+		for _, d := range all {
+			d.RestrictTo(0)
+		}
+	}
 	return true
 }
 
 type slitherlinkBoxConstraint struct{ n int }
 
 func (c slitherlinkBoxConstraint) Init(all []*csp.Decision, size int) {
-	// TODO(dneal): Special case 0?
+	// Optimize a bit by special-casing 0.
+	if c.n == 0 {
+		for _, d := range all {
+			d.RestrictTo(0)
+		}
+	}
 }
 func (c slitherlinkBoxConstraint) Apply(all, dirty []*csp.Decision) bool {
-	// TODO(dneal): Exactly c.n surrounding lines must be set
+	possible := 0
+	set := 0
+	for _, d := range all {
+		if d.Value() == 1 {
+			set++
+		}
+		if d.Possible(1) {
+			possible++
+		}
+	}
+	if possible < c.n || set > c.n {
+		return false
+	}
+	if possible == c.n {
+		for _, d := range all {
+			if d.Possible(1) {
+				d.RestrictTo(1)
+			}
+		}
+		set = c.n
+	}
+	if set == c.n {
+		for _, d := range all {
+			if d.Value() != 1 {
+				d.RestrictTo(0)
+			}
+		}
+	}
 	return true
 }
 
@@ -417,11 +473,38 @@ func (g slitherlinkGrid) numLines() int {
 }
 
 func (g slitherlinkGrid) pointToLines(row, col int) []int {
-	return nil
+	var result []int
+	if row > 0 {
+		result = append(result, g.verticalLine(row-1, col))
+	}
+	if col > 0 {
+		result = append(result, g.horizontalLine(row, col-1))
+	}
+	if row <= g.numRows {
+		result = append(result, g.verticalLine(row, col))
+	}
+	if col <= g.numCols {
+		result = append(result, g.horizontalLine(row, col))
+	}
+	return result
 }
 
 func (g slitherlinkGrid) boxToLines(row, col int) []int {
-	return nil
+	return []int{g.horizontalLine(row, col),
+		g.verticalLine(row, col),
+		g.horizontalLine(row+1, col),
+		g.verticalLine(row, col+1)}
+}
+
+func (g slitherlinkGrid) horizontalLine(row, col int) int {
+	// Horizontal lines come first.
+	return row*(g.numCols) + col
+}
+
+func (g slitherlinkGrid) verticalLine(row, col int) int {
+	// Vertical lines come after horizontal lines
+	return g.numCols*(g.numRows+1) + row*(g.numCols+1) + col
+
 }
 
 func NewSlitherlinkPuzzle(input string) *Puzzle {
