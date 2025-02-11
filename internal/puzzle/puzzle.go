@@ -376,7 +376,6 @@ func NewDropquotePuzzle(input string, t *trie.Trie) *Puzzle {
 		offset += length
 	}
 	for i := 0; i < numCols; i++ {
-		// TODO(dneal): Allow non-covering sets.
 		result.problem.AddGroup(cols[i], constraints.SetCount(colSets[i], isCovering[i]))
 	}
 	return result
