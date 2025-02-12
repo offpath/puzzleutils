@@ -464,15 +464,16 @@ func (c slitherlinkLoopConstraint) Apply(all, dirty []*csp.Decision) bool {
 	return true
 }
 
-type slitherlinkGrid struct {
+type SlitherlinkPuzzle struct {
+	*Puzzle
 	numRows, numCols int
 }
 
-func (g slitherlinkGrid) numLines() int {
+func (g SlitherlinkPuzzle) numLines() int {
 	return g.numCols*(g.numRows+1) + g.numRows*(g.numCols+1)
 }
 
-func (g slitherlinkGrid) pointToLines(row, col int) []int {
+func (g SlitherlinkPuzzle) pointToLines(row, col int) []int {
 	var result []int
 	if row > 0 {
 		result = append(result, g.verticalLine(row-1, col))
@@ -489,37 +490,40 @@ func (g slitherlinkGrid) pointToLines(row, col int) []int {
 	return result
 }
 
-func (g slitherlinkGrid) boxToLines(row, col int) []int {
+func (g SlitherlinkPuzzle) boxToLines(row, col int) []int {
 	return []int{g.horizontalLine(row, col),
 		g.verticalLine(row, col),
 		g.horizontalLine(row+1, col),
 		g.verticalLine(row, col+1)}
 }
 
-func (g slitherlinkGrid) horizontalLine(row, col int) int {
+func (g SlitherlinkPuzzle) horizontalLine(row, col int) int {
 	// Horizontal lines come first.
 	return row*(g.numCols) + col
 }
 
-func (g slitherlinkGrid) verticalLine(row, col int) int {
+func (g SlitherlinkPuzzle) verticalLine(row, col int) int {
 	// Vertical lines come after horizontal lines
 	return g.numCols*(g.numRows+1) + row*(g.numCols+1) + col
 
 }
 
-func NewSlitherlinkPuzzle(input string) *Puzzle {
+func NewSlitherlinkPuzzle(input string) SlitherlinkPuzzle {
 	lines := strings.Split(input, "\n")
-	g := slitherlinkGrid{len(lines), len(lines[0])}
-	result := NewPuzzle(g.numLines(), []string{"0", "1"})
+	g := SlitherlinkPuzzle{
+		numRows: len(lines),
+		numCols: len(lines[0]),
+	}
+	g.Puzzle = NewPuzzle(g.numLines(), []string{"0", "1"})
 	for i := 0; i <= g.numRows; i++ {
 		for j := 0; j <= g.numCols; j++ {
-			result.problem.AddGroup(g.pointToLines(i, j), slitherlinkPointConstraint{})
+			g.problem.AddGroup(g.pointToLines(i, j), slitherlinkPointConstraint{})
 		}
 	}
 	for i := 0; i < g.numRows; i++ {
 		for j := 0; j < g.numCols; j++ {
 			if lines[i][j] != '.' {
-				result.problem.AddGroup(g.boxToLines(i, j), slitherlinkBoxConstraint{int(lines[i][j] - '0')})
+				g.problem.AddGroup(g.boxToLines(i, j), slitherlinkBoxConstraint{int(lines[i][j] - '0')})
 			}
 		}
 	}
@@ -527,9 +531,12 @@ func NewSlitherlinkPuzzle(input string) *Puzzle {
 	for i := 0; i < g.numLines(); i++ {
 		group = append(group, i)
 	}
-	result.problem.AddGroup(group, slitherlinkLoopConstraint{})
+	g.problem.AddGroup(group, slitherlinkLoopConstraint{})
 
-	return result
+	return g
 }
 
-// TODO(dneal): Implement a slitherlink printer
+func (g SlitherlinkPuzzle) ToString() string {
+	// TODO(dneal): Implement a slitherlink printer
+	return ""
+}

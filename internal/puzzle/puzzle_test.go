@@ -214,3 +214,22 @@ func TestDropquote(t *testing.T) {
 		}
 	}
 }
+
+var slitherlinkTests = []struct {
+	name  string
+	input string
+	want  string
+}{}
+
+func TestSlitherlink(t *testing.T) {
+	for _, tt := range slitherlinkTests {
+		slitherlink := NewSlitherlinkPuzzle(tt.input)
+		if !slitherlink.Solve(csp.Settings{Decider: &decide.First{}, DecisionTracker: tracker.PrintEveryN(1)}) {
+			t.Errorf("test: %s, failed to solve!\n", tt.name)
+		}
+		got := slitherlink.ToString()
+		if got != tt.want {
+			t.Errorf("test: %s, got: %s, want: %s\n", tt.name, got, tt.want)
+		}
+	}
+}
