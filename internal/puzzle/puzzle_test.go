@@ -219,7 +219,41 @@ var slitherlinkTests = []struct {
 	name  string
 	input string
 	want  string
-}{}
+}{
+	{
+		name:  "Trivial 1x1",
+		input: "4",
+		want: `.-.
+| |
+.-.`,
+	},
+	{
+		name:  "Empty 1x1",
+		input: "0",
+		want: `.X.
+X X
+.X.`,
+	},
+	{
+		name: "Basic 5x5 (loop constraint required)",
+		input: `...1.
+32.2.
+.22..
+.223.
+.22.3`,
+		want: `.-.-.-.-.-.
+|         |
+. .-.-. .-.
+| |   | |  
+.-. .-. .-.
+    |     |
+. .-. .-. .
+  |   | | |
+.-. .-. . .
+|   |   | |
+.-.-. . .-.`,
+	},
+}
 
 func TestSlitherlink(t *testing.T) {
 	for _, tt := range slitherlinkTests {
@@ -229,7 +263,7 @@ func TestSlitherlink(t *testing.T) {
 		}
 		got := slitherlink.ToString()
 		if got != tt.want {
-			t.Errorf("test: %s, got: %s, want: %s\n", tt.name, got, tt.want)
+			t.Errorf("test: %s, got: \n%s\n want: \n%s\n", tt.name, got, tt.want)
 		}
 	}
 }

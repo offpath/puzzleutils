@@ -481,10 +481,10 @@ func (g SlitherlinkPuzzle) pointToLines(row, col int) []int {
 	if col > 0 {
 		result = append(result, g.horizontalLine(row, col-1))
 	}
-	if row <= g.numRows {
+	if row < g.numRows {
 		result = append(result, g.verticalLine(row, col))
 	}
-	if col <= g.numCols {
+	if col < g.numCols {
 		result = append(result, g.horizontalLine(row, col))
 	}
 	return result
@@ -536,7 +536,39 @@ func NewSlitherlinkPuzzle(input string) SlitherlinkPuzzle {
 	return g
 }
 
+func (g SlitherlinkPuzzle) horizontalString(row int) string {
+	result := "."
+	for i := 0; i < g.numCols; i++ {
+		if g.problem.Get(g.horizontalLine(row, i)).Value() == 1 {
+			result += "-"
+		} else {
+			result += "X"
+		}
+		result += "."
+	}
+	return result
+}
+
+func (g SlitherlinkPuzzle) verticalString(row int) string {
+	result := ""
+	for i := 0; i <= g.numCols; i++ {
+		if g.problem.Get(g.verticalLine(row, i)).Value() == 1 {
+			result += "|"
+		} else {
+			result += "X"
+		}
+		if i != g.numCols {
+			result += " "
+		}
+	}
+	return result
+}
+
 func (g SlitherlinkPuzzle) ToString() string {
-	// TODO(dneal): Implement a slitherlink printer
-	return ""
+	result := []string{}
+	for i := 0; i < g.numRows; i++ {
+		result = append(result, g.horizontalString(i), g.verticalString(i))
+	}
+	result = append(result, g.horizontalString(g.numRows))
+	return strings.Join(result, "\n")
 }
