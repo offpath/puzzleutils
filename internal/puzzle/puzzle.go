@@ -460,8 +460,43 @@ type slitherlinkLoopConstraint struct{ g SlitherlinkPuzzle }
 
 func (c slitherlinkLoopConstraint) Init(all []*csp.Decision, size int) {}
 func (c slitherlinkLoopConstraint) Apply(all, dirty []*csp.Decision) bool {
-	// TODO(dneal): Exactly one loop is allowed
-	return true
+	// Exactly one loop is allowed
+	hasLoop := false
+	hasUnfinishedLoop := false
+	for i := 0; i < c.g.numRows; i++ {
+		for j := 0; j < c.g.numCols; j++ {
+			curPt := slitherlinkPoint{i, j}
+			seenPts := map[slitherlinkPoint]bool{}
+			prevLine := -1
+			for {
+				lineFound := -1
+				for _, line := range c.g.pointToLines(curPt) {
+					if line != prevLine && all[line].Value() == 1 {
+						lineFound = line
+						break
+					}
+				}
+				if lineFound < 0 {
+					if len(seenPts) > 0 {
+						hasUnfinishedLoop = true
+					}
+					break
+				}
+				prevLine = lineFound
+				seenPts[curPt] = true
+				if curPt != c.g.lineToPointsMap[lineFound][0] {
+					curPt = c.g.lineToPointsMap[lineFound][0]
+				} else {
+					curPt = c.g.lineToPointsMap[lineFound][1]
+				}
+				if seenPts[curPt] {
+					hasLoop = true
+					break
+				}
+			}
+		}
+	}
+	return !(hasLoop && hasUnfinishedLoop)
 }
 
 type slitherlinkPoint struct {
@@ -471,6 +506,7 @@ type slitherlinkPoint struct {
 type SlitherlinkPuzzle struct {
 	*Puzzle
 	numRows, numCols int
+	lineToPointsMap  map[int][]slitherlinkPoint
 }
 
 func (g SlitherlinkPuzzle) numLines() int {
@@ -512,8 +548,17 @@ func (g SlitherlinkPuzzle) verticalLine(pt slitherlinkPoint) int {
 func NewSlitherlinkPuzzle(input string) SlitherlinkPuzzle {
 	lines := strings.Split(input, "\n")
 	g := SlitherlinkPuzzle{
-		numRows: len(lines),
-		numCols: len(lines[0]),
+		numRows:         len(lines),
+		numCols:         len(lines[0]),
+		lineToPointsMap: map[int][]slitherlinkPoint{},
+	}
+	for i := 0; i <= g.numRows; i++ {
+		for j := 0; j <= g.numCols; j++ {
+			pt := slitherlinkPoint{i, j}
+			for _, line := range g.pointToLines(pt) {
+				g.lineToPointsMap[line] = append(g.lineToPointsMap[line], pt)
+			}
+		}
 	}
 	g.Puzzle = NewPuzzle(g.numLines(), []string{"0", "1"})
 	for i := 0; i <= g.numRows; i++ {
