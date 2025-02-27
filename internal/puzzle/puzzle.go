@@ -456,12 +456,16 @@ func (c slitherlinkBoxConstraint) Apply(all, dirty []*csp.Decision) bool {
 	return true
 }
 
-type slitherlinkLoopConstraint struct{}
+type slitherlinkLoopConstraint struct{ g SlitherlinkPuzzle }
 
 func (c slitherlinkLoopConstraint) Init(all []*csp.Decision, size int) {}
 func (c slitherlinkLoopConstraint) Apply(all, dirty []*csp.Decision) bool {
 	// TODO(dneal): Exactly one loop is allowed
 	return true
+}
+
+type slitherlinkPoint struct {
+	row, col int
 }
 
 type SlitherlinkPuzzle struct {
@@ -473,38 +477,35 @@ func (g SlitherlinkPuzzle) numLines() int {
 	return g.numCols*(g.numRows+1) + g.numRows*(g.numCols+1)
 }
 
-func (g SlitherlinkPuzzle) pointToLines(row, col int) []int {
+func (g SlitherlinkPuzzle) pointToLines(pt slitherlinkPoint) []int {
 	var result []int
-	if row > 0 {
-		result = append(result, g.verticalLine(row-1, col))
+	if pt.row > 0 {
+		result = append(result, g.verticalLine(slitherlinkPoint{pt.row - 1, pt.col}))
 	}
-	if col > 0 {
-		result = append(result, g.horizontalLine(row, col-1))
+	if pt.col > 0 {
+		result = append(result, g.horizontalLine(slitherlinkPoint{pt.row, pt.col - 1}))
 	}
-	if row < g.numRows {
-		result = append(result, g.verticalLine(row, col))
+	if pt.row < g.numRows {
+		result = append(result, g.verticalLine(pt))
 	}
-	if col < g.numCols {
-		result = append(result, g.horizontalLine(row, col))
+	if pt.col < g.numCols {
+		result = append(result, g.horizontalLine(pt))
 	}
 	return result
 }
 
-func (g SlitherlinkPuzzle) boxToLines(row, col int) []int {
-	return []int{g.horizontalLine(row, col),
-		g.verticalLine(row, col),
-		g.horizontalLine(row+1, col),
-		g.verticalLine(row, col+1)}
+func (g SlitherlinkPuzzle) boxToLines(pt slitherlinkPoint) []int {
+	return []int{g.horizontalLine(pt), g.verticalLine(pt), g.horizontalLine(slitherlinkPoint{pt.row + 1, pt.col}), g.verticalLine(slitherlinkPoint{pt.row, pt.col + 1})}
 }
 
-func (g SlitherlinkPuzzle) horizontalLine(row, col int) int {
+func (g SlitherlinkPuzzle) horizontalLine(pt slitherlinkPoint) int {
 	// Horizontal lines come first.
-	return row*(g.numCols) + col
+	return pt.row*(g.numCols) + pt.col
 }
 
-func (g SlitherlinkPuzzle) verticalLine(row, col int) int {
+func (g SlitherlinkPuzzle) verticalLine(pt slitherlinkPoint) int {
 	// Vertical lines come after horizontal lines
-	return g.numCols*(g.numRows+1) + row*(g.numCols+1) + col
+	return g.numCols*(g.numRows+1) + pt.row*(g.numCols+1) + pt.col
 
 }
 
@@ -517,13 +518,13 @@ func NewSlitherlinkPuzzle(input string) SlitherlinkPuzzle {
 	g.Puzzle = NewPuzzle(g.numLines(), []string{"0", "1"})
 	for i := 0; i <= g.numRows; i++ {
 		for j := 0; j <= g.numCols; j++ {
-			g.problem.AddGroup(g.pointToLines(i, j), slitherlinkPointConstraint{})
+			g.problem.AddGroup(g.pointToLines(slitherlinkPoint{i, j}), slitherlinkPointConstraint{})
 		}
 	}
 	for i := 0; i < g.numRows; i++ {
 		for j := 0; j < g.numCols; j++ {
 			if lines[i][j] != '.' {
-				g.problem.AddGroup(g.boxToLines(i, j), slitherlinkBoxConstraint{int(lines[i][j] - '0')})
+				g.problem.AddGroup(g.boxToLines(slitherlinkPoint{i, j}), slitherlinkBoxConstraint{int(lines[i][j] - '0')})
 			}
 		}
 	}
@@ -531,15 +532,15 @@ func NewSlitherlinkPuzzle(input string) SlitherlinkPuzzle {
 	for i := 0; i < g.numLines(); i++ {
 		group = append(group, i)
 	}
-	g.problem.AddGroup(group, slitherlinkLoopConstraint{})
+	g.problem.AddGroup(group, slitherlinkLoopConstraint{g})
 
 	return g
 }
 
-func (g SlitherlinkPuzzle) horizontalString(row int) string {
+func (g SlitherlinkPuzzle) horizontalString(pt slitherlinkPoint) string {
 	result := "."
-	for i := 0; i < g.numCols; i++ {
-		if g.problem.Get(g.horizontalLine(row, i)).Value() == 1 {
+	for col := 0; col < g.numCols; col++ {
+		if g.problem.Get(g.horizontalLine(slitherlinkPoint{pt.row, col})).Value() == 1 {
 			result += "-"
 		} else {
 			result += "X"
@@ -549,15 +550,15 @@ func (g SlitherlinkPuzzle) horizontalString(row int) string {
 	return result
 }
 
-func (g SlitherlinkPuzzle) verticalString(row int) string {
+func (g SlitherlinkPuzzle) verticalString(pt slitherlinkPoint) string {
 	result := ""
-	for i := 0; i <= g.numCols; i++ {
-		if g.problem.Get(g.verticalLine(row, i)).Value() == 1 {
+	for col := 0; col <= g.numCols; col++ {
+		if g.problem.Get(g.verticalLine(slitherlinkPoint{pt.row, col})).Value() == 1 {
 			result += "|"
 		} else {
 			result += "X"
 		}
-		if i != g.numCols {
+		if col != g.numCols {
 			result += " "
 		}
 	}
@@ -566,9 +567,9 @@ func (g SlitherlinkPuzzle) verticalString(row int) string {
 
 func (g SlitherlinkPuzzle) ToString() string {
 	result := []string{}
-	for i := 0; i < g.numRows; i++ {
-		result = append(result, g.horizontalString(i), g.verticalString(i))
+	for row := 0; row < g.numRows; row++ {
+		result = append(result, g.horizontalString(slitherlinkPoint{row, 0}), g.verticalString(slitherlinkPoint{row, 0}))
 	}
-	result = append(result, g.horizontalString(g.numRows))
+	result = append(result, g.horizontalString(slitherlinkPoint{g.numRows, 0}))
 	return strings.Join(result, "\n")
 }
