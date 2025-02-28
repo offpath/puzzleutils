@@ -14,7 +14,7 @@ type Printer struct {
 }
 
 func (s *Printer) CaptureSolution(p *csp.Problem) {
-	s.p.Print()
+	fmt.Print(s.p)
 }
 
 func main() {
