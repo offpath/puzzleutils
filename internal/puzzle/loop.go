@@ -234,7 +234,7 @@ func (g SlitherlinkPuzzle) verticalString(pt slitherlinkPoint) string {
 	return result
 }
 
-func (g SlitherlinkPuzzle) ToString() string {
+func (g SlitherlinkPuzzle) String() string {
 	result := []string{}
 	for row := 0; row < g.numRows; row++ {
 		result = append(result, g.horizontalString(slitherlinkPoint{row, 0}), g.verticalString(slitherlinkPoint{row, 0}))

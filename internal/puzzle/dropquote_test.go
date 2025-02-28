@@ -124,7 +124,7 @@ func TestDropquote(t *testing.T) {
 		if !dropquote.Solve(csp.Settings{Decider: &decide.First{}, DecisionTracker: tracker.PrintEveryN(1)}) {
 			t.Errorf("test: %s, failed to solve!\n", tt.name)
 		}
-		got := dropquote.ToString()
+		got := dropquote.String()
 		if got != tt.want {
 			t.Errorf("test: %s, got: %s, want: %s\n", tt.name, got, tt.want)
 		}

@@ -1,8 +1,6 @@
 package puzzle
 
 import (
-	"fmt"
-
 	"github.com/offpath/puzzleutils/internal/constraints"
 	"github.com/offpath/puzzleutils/internal/csp"
 )
@@ -56,7 +54,7 @@ func (p *GridPuzzle) RowGroups() [][]GridEntry {
 	return result
 }
 
-func (p *GridPuzzle) ToString() string {
+func (p *GridPuzzle) String() string {
 	result := ""
 	for i := 0; i < p.height; i++ {
 		for j := 0; j < p.width; j++ {
@@ -69,10 +67,6 @@ func (p *GridPuzzle) ToString() string {
 		result += "\n"
 	}
 	return result
-}
-
-func (p *GridPuzzle) Print() {
-	fmt.Print(p.ToString())
 }
 
 func NewSudokuPuzzle() *GridPuzzle {

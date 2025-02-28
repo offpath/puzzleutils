@@ -64,7 +64,7 @@ func TestNonogram(t *testing.T) {
 	}
 	nonogram := NewNonogramPuzzle(rows, cols)
 	nonogram.problem.Solve(csp.Settings{Decider: &decide.First{}})
-	got := nonogram.ToString()
+	got := nonogram.String()
 	want := `XXXXXXXX.XXXXXXX.XXXXX.XXXXXXX
 ..XXXXX...XXXX....XXX....XXX..
 ...XXX.....XXX....XX.....XXX..

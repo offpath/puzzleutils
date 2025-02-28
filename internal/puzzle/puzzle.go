@@ -157,7 +157,7 @@ func (p *Puzzle) Solve(s csp.Settings) bool {
 	return p.problem.Solve(s)
 }
 
-func (p *Puzzle) ToString() string {
+func (p *Puzzle) String() string {
 	result := ""
 	for i := 0; i < p.problem.Size(); i++ {
 		v := " "

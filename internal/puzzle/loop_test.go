@@ -54,7 +54,7 @@ func TestSlitherlink(t *testing.T) {
 		if !slitherlink.Solve(csp.Settings{Decider: &decide.First{}, DecisionTracker: tracker.PrintEveryN(1)}) {
 			t.Errorf("test: %s, failed to solve!\n", tt.name)
 		}
-		got := slitherlink.ToString()
+		got := slitherlink.String()
 		if got != tt.want {
 			t.Errorf("test: %s, got: \n%s\n want: \n%s\n", tt.name, got, tt.want)
 		}
