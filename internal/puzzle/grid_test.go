@@ -7,6 +7,8 @@ import (
 	"github.com/offpath/puzzleutils/internal/decide"
 )
 
+// TODO(dneal): Sudoku unittests.
+
 func TestNonogram(t *testing.T) {
 	rows := [][]int{
 		{8, 7, 5, 7},
