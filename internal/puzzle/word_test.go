@@ -139,8 +139,17 @@ var cryptegramTests = []struct {
 	{
 		name:  "trivial",
 		input: "ABBCCEEFEG",
-		want:  "BOKEPR",
+		// BOOKKEEPER
+		want: "BOKEPR",
 	},
+
+	// TODO(dneal): Fix this, either by finding a long example with a unique solution, or by ensuring that the solution is *one of* the viable answers.
+	//{
+	//	name:  "hard",
+	//	input: "MTT OSQTGNGOSQUN QV PGD KQYU WSUJ SGJU MKU ZGZNUZNU RDW NGJU MKU XKUMWUK ZGZNUZNU WSMZ GWSUKN",
+	// ALL PHILOSOPHIES IF YOU RIDE THEM HOME ARE NONSENSE BUT SOME ARE GREATER NONSENSE THAN OTHERS
+	//	want:  "ALPHIOSEDFURCTMNBG",
+	//},
 }
 
 func TestCryptogram(t *testing.T) {
