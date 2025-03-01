@@ -70,3 +70,27 @@ func NewDropquotePuzzle(input string, t *trie.Trie) *Puzzle {
 	}
 	return result
 }
+
+func NewCryptogramPuzzle(input string, t *trie.Trie) *Puzzle {
+	words := strings.Split(input, " ")
+	uniqueLetters := map[string]int{}
+	curr := 0
+	for _, word := range words {
+		for _, c := range word {
+			if _, ok := uniqueLetters[string(c)]; !ok {
+				uniqueLetters[string(c)] = curr
+				curr++
+			}
+		}
+	}
+	result := NewPuzzle(len(uniqueLetters), alphabet)
+	result.problem.AddGroup(result.AllGroup(), constraints.Unique(false))
+	for _, word := range words {
+		var group []int
+		for _, c := range word {
+			group = append(group, uniqueLetters[string(c)])
+		}
+		result.problem.AddGroup(group, constraints.ValidWord(t, alphabet))
+	}
+	return result
+}

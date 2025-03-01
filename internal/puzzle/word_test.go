@@ -130,3 +130,30 @@ func TestDropquote(t *testing.T) {
 		}
 	}
 }
+
+var cryptegramTests = []struct {
+	name  string
+	input string
+	want  string
+}{
+	{
+		name:  "trivial",
+		input: "ABBCCEEFEG",
+		want:  "BOKEPR",
+	},
+}
+
+func TestCryptogram(t *testing.T) {
+	tr := trie.New()
+	tr.AddFile(filepath.Join("testdata", "ospd2.txt"))
+	for _, tt := range cryptegramTests {
+		cryptogram := NewCryptogramPuzzle(tt.input, tr)
+		if !cryptogram.Solve(csp.Settings{Decider: &decide.First{}, DecisionTracker: tracker.PrintEveryN(1)}) {
+			t.Errorf("test: %s, failed to solve!\n", tt.name)
+		}
+		got := cryptogram.String()
+		if got != tt.want {
+			t.Errorf("test: %s, got: %s, want: %s\n", tt.name, got, tt.want)
+		}
+	}
+}
