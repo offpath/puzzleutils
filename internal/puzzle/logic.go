@@ -175,7 +175,7 @@ func (lp *LogicPuzzle) parseExpression(tokens []string, i *int) astNode {
 	token := strings.TrimSpace(tokens[*i])
 	*i++
 	var args []astNode
-	if token == "(" {
+	if tokens[*i] == "(" {
 		*i++
 		for {
 			args = append(args, lp.parseExpression(tokens, i))
@@ -247,7 +247,10 @@ func (lp *LogicPuzzle) parseRule(s string) {
 
 func NewLogicPuzzle(s string) *LogicPuzzle {
 	lines := strings.Split(s, "\n")
-	result := &LogicPuzzle{}
+	result := &LogicPuzzle{
+		categories: map[string]*category{},
+		values:     map[string]*val{},
+	}
 	i := 0
 	for ; i < len(lines); i++ {
 		line := lines[i]
@@ -256,6 +259,9 @@ func NewLogicPuzzle(s string) *LogicPuzzle {
 		}
 		parts := strings.Split(line, ":")
 		result.categories[parts[0]] = &category{parts[0], strings.Split(parts[1], ",")}
+		for i, v := range result.categories[parts[0]].values {
+			result.values[v] = &val{v, parts[0], i}
+		}
 	}
 	i++
 	for ; i < len(lines); i++ {
