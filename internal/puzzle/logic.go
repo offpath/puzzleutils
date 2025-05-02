@@ -25,9 +25,9 @@ import (
 // 63, Sonia, cashew tofu
 //
 // Supported functions:
+// or
 // eq
 // neq
-// or
 // gt
 // gte
 // lt
@@ -78,33 +78,17 @@ func (v val) TypeCheck() bool {
 	return true
 }
 
-type equality struct {
-	left  astNode
-	right astNode
-	equal bool
-}
-
-func (e equality) Evaluate(lp *LogicPuzzle) valueSet {
-	// TODO(dneal): returns true if any overlap between value sets
-	return nil
-}
-
-func (e equality) TypeCheck() bool {
-	return e.left.Type() == e.right.Type()
-}
-
-func (e equality) Type() string {
-	return "bool"
-}
-
 type or struct {
 	left  astNode
 	right astNode
 }
 
 func (o or) Evaluate(lp *LogicPuzzle) valueSet {
-	// TODO(dneal)
-	return nil
+	l, r := o.left.Evaluate(lp), o.right.Evaluate(lp)
+	if l["true"] || r["true"] {
+		return valueSet{"true": true}
+	}
+	return valueSet{"false": true}
 }
 
 func (o or) TypeCheck() bool {
@@ -122,8 +106,39 @@ type comparison struct {
 }
 
 func (c comparison) Evaluate(lp *LogicPuzzle) valueSet {
-	// TODO(dneal)
-	return nil
+	l, r := c.left.Evaluate(lp), c.right.Evaluate(lp)
+	for a := range l {
+		for b := range r {
+			i, j := lp.LookupIndex(a), lp.LookupIndex(b)
+			switch c.op {
+			case "eq":
+				if i == j {
+					return valueSet{"true": true}
+				}
+			case "neq":
+				if i != j {
+					return valueSet{"true": true}
+				}
+			case "gt":
+				if i > j {
+					return valueSet{"true": true}
+				}
+			case "gte":
+				if i >= j {
+					return valueSet{"true": true}
+				}
+			case "lt":
+				if i < j {
+					return valueSet{"true": true}
+				}
+			case "lte":
+				if i <= j {
+					return valueSet{"true": true}
+				}
+			}
+		}
+	}
+	return valueSet{"false": true}
 }
 
 func (c comparison) TypeCheck() bool {
@@ -210,12 +225,12 @@ func (lp *LogicPuzzle) parseExpression(tokens []string, i *int) astNode {
 	}
 
 	switch token {
+	case "or":
+		return or{args[0], args[1]}
 	case "eq":
 		fallthrough
 	case "neq":
-		return equality{args[0], args[1], token == "eq"}
-	case "or":
-		return or{args[0], args[1]}
+		fallthrough
 	case "gt":
 		fallthrough
 	case "gte":
@@ -243,6 +258,13 @@ func (lp *LogicPuzzle) parseRule(s string) {
 		log.Fatalf("Invalid rule: %s", s)
 	}
 	lp.rules = append(lp.rules, astNode)
+}
+
+func (lp *LogicPuzzle) LookupIndex(v string) int {
+	if val := lp.values[v]; val != nil {
+		return val.index
+	}
+	return -1
 }
 
 func NewLogicPuzzle(s string) *LogicPuzzle {
