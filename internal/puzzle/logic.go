@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -142,7 +143,8 @@ func (c comparison) Evaluate(lp *LogicPuzzle) valueSet {
 }
 
 func (c comparison) TypeCheck() bool {
-	return c.left.Type() == c.right.Type()
+	l, r := c.left.Type(), c.right.Type()
+	return l != "int" && l != "bool" && l == r
 }
 
 func (c comparison) Type() string {
@@ -156,12 +158,26 @@ type plusMinus struct {
 }
 
 func (p plusMinus) Evaluate(lp *LogicPuzzle) valueSet {
-	// TODO(dneal)
-	return nil
+	l, r := p.left.Evaluate(lp), p.right.Evaluate(lp)
+	result := valueSet{}
+	for a := range l {
+		for b := range r {
+			i := lp.LookupIndex(a)
+			j, _ := strconv.Atoi(b)
+			switch p.op {
+			case "plus":
+				result[lp.LookupValue(p.left.Type(), i+j)] = true
+			case "minus":
+				result[lp.LookupValue(p.left.Type(), i-j)] = true
+			}
+		}
+	}
+	return result
 }
 
 func (p plusMinus) TypeCheck() bool {
-	return p.left.Type() == p.right.Type()
+	l, r := p.left.Type(), p.right.Type()
+	return l != "int" && l != "bool" && r == "int"
 }
 
 func (p plusMinus) Type() string {
@@ -265,6 +281,13 @@ func (lp *LogicPuzzle) LookupIndex(v string) int {
 		return val.index
 	}
 	return -1
+}
+
+func (lp *LogicPuzzle) LookupValue(category string, index int) string {
+	if index < 0 || index > len(lp.categories[category].values) {
+		return ""
+	}
+	return lp.categories[category].values[index]
 }
 
 func NewLogicPuzzle(s string) *LogicPuzzle {
