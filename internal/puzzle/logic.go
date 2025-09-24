@@ -304,8 +304,8 @@ func NewLogicPuzzle(s string) *LogicPuzzle {
 		}
 		parts := strings.Split(line, ":")
 		result.categories[parts[0]] = &category{parts[0], strings.Split(parts[1], ",")}
-		for i, v := range result.categories[parts[0]].values {
-			result.values[v] = &val{v, parts[0], i}
+		for j, v := range result.categories[parts[0]].values {
+			result.values[v] = &val{v, parts[0], j}
 		}
 	}
 	i++
