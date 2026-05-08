@@ -6,6 +6,7 @@ import (
 	"github.com/offpath/puzzleutils/internal/csp"
 	"github.com/offpath/puzzleutils/internal/decide"
 	"github.com/offpath/puzzleutils/internal/puzzle"
+	"github.com/offpath/puzzleutils/internal/puzzletypes"
 	"github.com/offpath/puzzleutils/internal/tracker"
 )
 
@@ -33,8 +34,8 @@ func main() {
 	*/
 
 	p := puzzle.NewPuzzle2()
-	s := puzzle.NewSudoku(p)
-	s.Get(0, 0).Value(p.GetIntValue(6))
+	s := puzzletypes.NewSudoku(p)
+	s.Get(0, 0).SetInitialValue(p.GetIntValue(6))
 
 	sudoku0 := puzzle.NewSudokuPuzzle()
 	sudoku0.Init(

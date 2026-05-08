@@ -53,6 +53,16 @@ func (g *Grid) GetCol(col int) []*puzzle.Variable {
 	return result
 }
 
+func (g *Grid) GetRect(row int, col int, height int, width int) []*puzzle.Variable {
+	var result []*puzzle.Variable
+	for i := 0; i < height; i++ {
+		for j := 0; j < width; j++ {
+			result = append(result, g.variables[row+i][col+j])
+		}
+	}
+	return result
+}
+
 func (g *Grid) Init(start string) {
 	for i, r := range g.variables {
 		for j, v := range r {
