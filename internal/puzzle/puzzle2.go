@@ -1,6 +1,8 @@
 package puzzle
 
 import (
+	"strconv"
+
 	"github.com/offpath/puzzleutils/internal/csp"
 )
 
@@ -159,7 +161,7 @@ func (c valueSetConstraint) Apply(all, dirty []*csp.Decision) bool {
 	return true
 }
 
-func (p *Puzzle2) Solve(settings csp.Settings) {
+func (p *Puzzle2) Solve(settings csp.Settings) bool {
 	p.problem = csp.NewProblem(len(p.variables), len(p.intValues))
 	for _, v := range p.variables {
 		group := []int{v.id}
@@ -172,7 +174,7 @@ func (p *Puzzle2) Solve(settings csp.Settings) {
 		}
 		p.problem.AddGroup(group, constraintShim{g.c})
 	}
-	p.problem.Solve(settings)
+	return p.problem.Solve(settings)
 }
 
 type Grid struct {
@@ -255,6 +257,33 @@ func NewSudoku(p *Puzzle2) *Grid {
 				}
 			}
 			p.AddConstraint(&UniqueConstraint{block})
+		}
+	}
+	return result
+}
+
+func (g *Grid) Init(start string) {
+	for i, r := range g.variables {
+		for j, v := range r {
+			if start[i*g.cols+j] != '.' {
+				v.SetInitialValue(v.p.GetIntValue(int(start[i*g.cols+j] - '0')))
+			}
+		}
+	}
+}
+
+func (g *Grid) String() string {
+	result := ""
+	for i, r := range g.variables {
+		for _, v := range r {
+			if val := v.Values().Value(); val != nil {
+				result += strconv.Itoa(val.Int())
+			} else {
+				result += "."
+			}
+		}
+		if i < g.rows-1 {
+			result += "\n"
 		}
 	}
 	return result
