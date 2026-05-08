@@ -252,10 +252,7 @@ func (c *UniqueConstraint) Check() bool {
 			missingCount++
 		}
 	}
-	if missingCount > len(c.vs)-len(c.variables) {
-		return false
-	}
-	return true
+	return missingCount <= len(c.vs)-len(c.variables)
 }
 
 func NewSudoku(p *Puzzle2) *Grid {
