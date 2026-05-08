@@ -225,6 +225,7 @@ func (g *Grid) GetCol(col int) []*Variable {
 
 type UniqueConstraint struct {
 	variables []*Variable
+	vs        ValueSet
 }
 
 func (c *UniqueConstraint) Variables() []*Variable { return c.variables }
@@ -238,15 +239,32 @@ func (c *UniqueConstraint) Check() bool {
 			}
 		}
 	}
+	missingCount := 0
+	for val := range c.vs {
+		found := false
+		for _, v := range c.variables {
+			if v.Values()[val] {
+				found = true
+				break
+			}
+		}
+		if !found {
+			missingCount++
+		}
+	}
+	if missingCount > len(c.vs)-len(c.variables) {
+		return false
+	}
 	return true
 }
 
 func NewSudoku(p *Puzzle2) *Grid {
 	result := NewGrid(p, 9, 9)
-	result.Fill(p.GetIntRange(1, 9))
+	vs := p.GetIntRange(1, 9)
+	result.Fill(vs)
 	for i := 0; i < 9; i++ {
-		p.AddConstraint(&UniqueConstraint{result.GetRow(i)})
-		p.AddConstraint(&UniqueConstraint{result.GetCol(i)})
+		p.AddConstraint(&UniqueConstraint{result.GetRow(i), vs})
+		p.AddConstraint(&UniqueConstraint{result.GetCol(i), vs})
 	}
 	for i := range 3 {
 		for j := range 3 {
@@ -256,7 +274,7 @@ func NewSudoku(p *Puzzle2) *Grid {
 					block = append(block, result.Get(i*3+k, j*3+l))
 				}
 			}
-			p.AddConstraint(&UniqueConstraint{block})
+			p.AddConstraint(&UniqueConstraint{block, vs})
 		}
 	}
 	return result
