@@ -21,6 +21,10 @@ func (val *Value) Str() string {
 	return val.val.(string)
 }
 
+func (val *Value) Raw() interface{} {
+	return val.val
+}
+
 type ValueSet map[*Value]bool
 
 func (vs ValueSet) Clone() ValueSet {

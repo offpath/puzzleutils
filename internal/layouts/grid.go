@@ -79,7 +79,20 @@ func (g *Grid) String() string {
 	for i, r := range g.variables {
 		for _, v := range r {
 			if val := v.Values().Value(); val != nil {
-				result += strconv.Itoa(val.Int())
+				switch v := val.Raw().(type) {
+				case int:
+					result += strconv.Itoa(v)
+				case bool:
+					if v {
+						result += "X"
+					} else {
+						result += " "
+					}
+				case string:
+					result += v
+				default:
+					result += "?"
+				}
 			} else {
 				result += "."
 			}
