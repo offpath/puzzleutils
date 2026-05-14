@@ -5,12 +5,20 @@ import (
 )
 
 type Value struct {
-	i  int
-	id int
+	val interface{}
+	id  int
 }
 
 func (val *Value) Int() int {
-	return val.i
+	return val.val.(int)
+}
+
+func (val *Value) Bool() bool {
+	return val.val.(bool)
+}
+
+func (val *Value) Str() string {
+	return val.val.(string)
 }
 
 type ValueSet map[*Value]bool
@@ -74,7 +82,7 @@ type group struct {
 }
 
 type Puzzle2 struct {
-	intValues map[int]*Value
+	values    map[interface{}]*Value
 	variables []*Variable
 	groups    []*group
 	problem   *csp.Problem
@@ -82,7 +90,7 @@ type Puzzle2 struct {
 
 func NewPuzzle2() *Puzzle2 {
 	return &Puzzle2{
-		intValues: map[int]*Value{},
+		values:    map[interface{}]*Value{},
 		variables: nil,
 		groups:    nil,
 		problem:   nil,
@@ -90,11 +98,29 @@ func NewPuzzle2() *Puzzle2 {
 }
 
 func (p *Puzzle2) GetIntValue(i int) *Value {
-	if val, ok := p.intValues[i]; ok {
+	if val, ok := p.values[i]; ok {
 		return val
 	}
-	val := &Value{i, len(p.intValues)}
-	p.intValues[i] = val
+	val := &Value{val: i, id: len(p.values)}
+	p.values[i] = val
+	return val
+}
+
+func (p *Puzzle2) GetBoolValue(b bool) *Value {
+	if val, ok := p.values[b]; ok {
+		return val
+	}
+	val := &Value{val: b, id: len(p.values)}
+	p.values[b] = val
+	return val
+}
+
+func (p *Puzzle2) GetStringValue(s string) *Value {
+	if val, ok := p.values[s]; ok {
+		return val
+	}
+	val := &Value{val: s, id: len(p.values)}
+	p.values[s] = val
 	return val
 }
 
@@ -160,7 +186,7 @@ func (c valueSetConstraint) Apply(all, dirty []*csp.Decision) bool {
 }
 
 func (p *Puzzle2) Solve(settings csp.Settings) bool {
-	p.problem = csp.NewProblem(len(p.variables), len(p.intValues))
+	p.problem = csp.NewProblem(len(p.variables), len(p.values))
 	for _, v := range p.variables {
 		group := []int{v.id}
 		p.problem.AddGroup(group, valueSetConstraint{v.possibleValues})

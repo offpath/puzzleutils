@@ -18,6 +18,7 @@ func NewGrid(p *puzzle.Puzzle2, rows int, cols int) *Grid {
 		rows:      rows,
 		cols:      cols,
 		variables: nil,
+		p:         p,
 	}
 	for i := 0; i < rows; i++ {
 		var row []*puzzle.Variable
