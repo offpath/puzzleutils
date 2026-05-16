@@ -156,6 +156,18 @@ func (p *Puzzle2) GetIntRange(min, max int) ValueSet {
 	return result
 }
 
+func (p *Puzzle2) GetStringRange(values []string) ValueSet {
+	result := ValueSet{}
+	for _, s := range values {
+		result[p.GetStringValue(s)] = true
+	}
+	return result
+}
+
+func (p *Puzzle2) GetAlphabet() ValueSet {
+	return p.GetStringRange([]string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"})
+}
+
 func (p *Puzzle2) NewVariable() *Variable {
 	result := &Variable{
 		p:              p,

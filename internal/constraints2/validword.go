@@ -9,10 +9,10 @@ type ValidWordConstraint struct {
 	p         *puzzle.Puzzle2
 	variables []*puzzle.Variable
 	t         *trie.Trie
-	valueSet  []string
+	valueSet  puzzle.ValueSet
 }
 
-func NewValidWordConstraint(p *puzzle.Puzzle2, variables []*puzzle.Variable, t *trie.Trie, valueSet []string) *ValidWordConstraint {
+func NewValidWordConstraint(p *puzzle.Puzzle2, variables []*puzzle.Variable, t *trie.Trie, valueSet puzzle.ValueSet) *ValidWordConstraint {
 	return &ValidWordConstraint{p, variables, t, valueSet}
 }
 
@@ -26,8 +26,8 @@ func (c *ValidWordConstraint) Check() bool {
 			return
 		}
 		v := vars[0]
-		for _, valStr := range c.valueSet {
-			valObj := c.p.GetStringValue(valStr)
+		for valObj := range c.valueSet {
+			valStr := valObj.Str()
 			if !v.Values()[valObj] {
 				continue
 			}
