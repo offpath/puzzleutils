@@ -10,7 +10,12 @@ import (
 
 var alphabet = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 
-func NewCryptogramPuzzle(p *puzzle.Puzzle2, input string, t *trie.Trie) [][]*puzzle.Variable {
+type CryptogramPuzzle struct {
+	Words [][]*puzzle.Variable
+	Codex map[string]*puzzle.Variable
+}
+
+func NewCryptogramPuzzle(p *puzzle.Puzzle2, input string, t *trie.Trie) *CryptogramPuzzle {
 	words := strings.Split(input, " ")
 	uniqueLetters := map[string]*puzzle.Variable{}
 
@@ -46,5 +51,8 @@ func NewCryptogramPuzzle(p *puzzle.Puzzle2, input string, t *trie.Trie) [][]*puz
 		result = append(result, group)
 	}
 
-	return result
+	return &CryptogramPuzzle{
+		Words: result,
+		Codex: uniqueLetters,
+	}
 }

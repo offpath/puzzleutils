@@ -36,7 +36,7 @@ func TestCryptogram(t *testing.T) {
 		}
 
 		var gotWords []string
-		for _, group := range result {
+		for _, group := range result.Words {
 			var wordGot string
 			for _, v := range group {
 				if val := v.Values().Value(); val != nil {
