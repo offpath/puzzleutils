@@ -1,4 +1,4 @@
-package puzzle
+package puzzletypes
 
 import (
 	"fmt"
@@ -6,6 +6,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/offpath/puzzleutils/internal/constraints2"
+	"github.com/offpath/puzzleutils/internal/puzzle"
 )
 
 // Example:
@@ -43,10 +46,13 @@ type category struct {
 }
 
 type LogicPuzzle struct {
-	*Puzzle
-	categories map[string]*category
-	values     map[string]*val
-	rules      []astNode
+	p             *puzzle.Puzzle2
+	categories    map[string]*category
+	categoryNames []string
+	values        map[string]*val
+	rules         []astNode
+	vars          map[string][]*puzzle.Variable
+	numEntities   int
 }
 
 type astNode interface {
@@ -108,38 +114,54 @@ type comparison struct {
 
 func (c comparison) Evaluate(lp *LogicPuzzle) valueSet {
 	l, r := c.left.Evaluate(lp), c.right.Evaluate(lp)
+	if len(l) == 0 || len(r) == 0 {
+		return valueSet{"false": true}
+	}
+	result := valueSet{}
 	for a := range l {
 		for b := range r {
 			i, j := lp.LookupIndex(a), lp.LookupIndex(b)
 			switch c.op {
 			case "eq":
 				if i == j {
-					return valueSet{"true": true}
+					result["true"] = true
+				} else {
+					result["false"] = true
 				}
 			case "neq":
 				if i != j {
-					return valueSet{"true": true}
+					result["true"] = true
+				} else {
+					result["false"] = true
 				}
 			case "gt":
 				if i > j {
-					return valueSet{"true": true}
+					result["true"] = true
+				} else {
+					result["false"] = true
 				}
 			case "gte":
 				if i >= j {
-					return valueSet{"true": true}
+					result["true"] = true
+				} else {
+					result["false"] = true
 				}
 			case "lt":
 				if i < j {
-					return valueSet{"true": true}
+					result["true"] = true
+				} else {
+					result["false"] = true
 				}
 			case "lte":
 				if i <= j {
-					return valueSet{"true": true}
+					result["true"] = true
+				} else {
+					result["false"] = true
 				}
 			}
 		}
 	}
-	return valueSet{"false": true}
+	return result
 }
 
 func (c comparison) TypeCheck() bool {
@@ -166,9 +188,15 @@ func (p plusMinus) Evaluate(lp *LogicPuzzle) valueSet {
 			j, _ := strconv.Atoi(b)
 			switch p.op {
 			case "plus":
-				result[lp.LookupValue(p.left.Type(), i+j)] = true
+				val := lp.LookupValue(p.left.Type(), i+j)
+				if val != "" {
+					result[val] = true
+				}
 			case "minus":
-				result[lp.LookupValue(p.left.Type(), i-j)] = true
+				val := lp.LookupValue(p.left.Type(), i-j)
+				if val != "" {
+					result[val] = true
+				}
 			}
 		}
 	}
@@ -190,8 +218,21 @@ type connection struct {
 }
 
 func (c connection) Evaluate(lp *LogicPuzzle) valueSet {
-	// TODO(dneal)
-	return nil
+	result := valueSet{}
+	argVals := c.arg.Evaluate(lp)
+	sourceCat := c.arg.Type()
+	targetCat := c.name
+
+	for s := range argVals {
+		for m := 0; m < lp.numEntities; m++ {
+			if lp.vars[sourceCat][m].Values()[lp.p.GetStringValue(s)] {
+				for t := range lp.vars[targetCat][m].Values() {
+					result[t.Str()] = true
+				}
+			}
+		}
+	}
+	return result
 }
 
 func (c connection) TypeCheck() bool {
@@ -200,6 +241,23 @@ func (c connection) TypeCheck() bool {
 
 func (c connection) Type() string {
 	return c.name
+}
+
+type LogicRuleConstraint struct {
+	lp   *LogicPuzzle
+	rule astNode
+}
+
+func (c *LogicRuleConstraint) Variables() []*puzzle.Variable {
+	var all []*puzzle.Variable
+	for _, vars := range c.lp.vars {
+		all = append(all, vars...)
+	}
+	return all
+}
+
+func (c *LogicRuleConstraint) Check() bool {
+	return c.rule.Evaluate(c.lp)["true"]
 }
 
 func (lp *LogicPuzzle) parseExpression(tokens []string, i *int) astNode {
@@ -224,6 +282,10 @@ func (lp *LogicPuzzle) parseExpression(tokens []string, i *int) astNode {
 	if len(args) == 0 {
 		v := lp.values[token]
 		if v == nil {
+			// This might be an integer for plus/minus
+			if _, err := strconv.Atoi(token); err == nil {
+				return val{token, "int", -1}
+			}
 			log.Fatalf("Unknown value: %s", token)
 		}
 		return v
@@ -284,33 +346,88 @@ func (lp *LogicPuzzle) LookupIndex(v string) int {
 }
 
 func (lp *LogicPuzzle) LookupValue(category string, index int) string {
-	if index < 0 || index > len(lp.categories[category].values) {
+	if index < 0 || index >= len(lp.categories[category].values) {
 		return ""
 	}
 	return lp.categories[category].values[index]
 }
 
-func NewLogicPuzzle(s string) *LogicPuzzle {
+func NewLogicPuzzle(p *puzzle.Puzzle2, s string) *LogicPuzzle {
 	lines := strings.Split(s, "\n")
 	result := &LogicPuzzle{
+		p:          p,
 		categories: map[string]*category{},
 		values:     map[string]*val{},
+		vars:       map[string][]*puzzle.Variable{},
 	}
 	i := 0
 	for ; i < len(lines); i++ {
-		line := lines[i]
+		line := strings.TrimSpace(lines[i])
 		if line == "" {
 			break
 		}
 		parts := strings.Split(line, ":")
-		result.categories[parts[0]] = &category{parts[0], strings.Split(parts[1], ",")}
-		for j, v := range result.categories[parts[0]].values {
-			result.values[v] = &val{v, parts[0], j}
+		catName := parts[0]
+		result.categories[catName] = &category{catName, strings.Split(parts[1], ",")}
+		result.categoryNames = append(result.categoryNames, catName)
+		for j, v := range result.categories[catName].values {
+			result.values[v] = &val{v, catName, j}
 		}
 	}
+
+	result.numEntities = len(result.categories[result.categoryNames[0]].values)
+
+	baseCat := result.categoryNames[0]
+	result.vars[baseCat] = make([]*puzzle.Variable, result.numEntities)
+	for m := 0; m < result.numEntities; m++ {
+		v := p.NewVariable()
+		v.SetValueRange(puzzle.ValueSet{p.GetStringValue(result.categories[baseCat].values[m]): true})
+		result.vars[baseCat][m] = v
+	}
+
+	for k := 1; k < len(result.categoryNames); k++ {
+		catName := result.categoryNames[k]
+		result.vars[catName] = make([]*puzzle.Variable, result.numEntities)
+		allowedVals := puzzle.ValueSet{}
+		for _, valStr := range result.categories[catName].values {
+			allowedVals[p.GetStringValue(valStr)] = true
+		}
+		for m := 0; m < result.numEntities; m++ {
+			v := p.NewVariable()
+			v.SetValueRange(allowedVals)
+			result.vars[catName][m] = v
+		}
+		p.AddConstraint(constraints2.NewUniqueConstraint(result.vars[catName], allowedVals))
+	}
+
 	i++
 	for ; i < len(lines); i++ {
-		result.parseRule(lines[i])
+		line := strings.TrimSpace(lines[i])
+		if line != "" {
+			result.parseRule(line)
+		}
 	}
+
+	for _, rule := range result.rules {
+		p.AddConstraint(&LogicRuleConstraint{lp: result, rule: rule})
+	}
+
 	return result
+}
+
+func (lp *LogicPuzzle) String() string {
+	var result []string
+	for m := 0; m < lp.numEntities; m++ {
+		var row []string
+		for _, catName := range lp.categoryNames {
+			val := lp.vars[catName][m].Values().Value()
+			if val != nil {
+				row = append(row, val.Str())
+			} else {
+				row = append(row, "?")
+			}
+		}
+		result = append(result, strings.Join(row, ", "))
+	}
+	return strings.Join(result, "\n")
 }
