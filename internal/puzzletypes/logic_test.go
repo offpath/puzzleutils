@@ -23,6 +23,21 @@ eq(Chef(Apple), Bob)`,
 		want: `Alice, Blueberry
 Bob, Apple`,
 	},
+	{
+		name: "complicated",
+		input: `Chef:Freda,Karl,Sonia,Wade
+Dish:cashew tofu,lemon snapper,smoked pork,turkey soup
+Score:42,49,56,63
+
+eq(Dish(Sonia), cashew tofu)
+eq(Score(Freda), 49)
+eq(Score(Karl), plus(Score(Chef(smoked pork)), 1))
+eq(Score(Chef(turkey soup)), minus(Score(Sonia), 1))`,
+		want: `Freda, smoked pork, 49
+Karl, turkey soup, 56
+Sonia, cashew tofu, 63
+Wade, lemon snapper, 42`,
+	},
 }
 
 func TestLogic(t *testing.T) {

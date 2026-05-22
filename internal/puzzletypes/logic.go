@@ -11,35 +11,6 @@ import (
 	"github.com/offpath/puzzleutils/internal/puzzle"
 )
 
-// Example:
-//
-// Chef:Freda,Karl,Sonia,Wade
-// Dish:cashew tofu,lemon snapper,smoked pork,turkey soup
-// Score:42,49,56,63
-//
-// eq(Dish(Sonia), cashew tofu)
-// eq(Score(Karl), plus(Chef(smoked pork), 1))
-// eq(Score(Freda, 49))
-// eq(Score(Chef(turkey soup)), minus(Score(Sonia), 1 ))
-//
-// Answers:
-// 42, Wade, lemon snapper
-// 49, Freda, smoked pork
-// 56, Karl, turkey soup
-// 63, Sonia, cashew tofu
-//
-// Supported functions:
-// or
-// eq
-// neq
-// gt
-// gte
-// lt
-// lte
-// plus
-// minus
-// <category name>
-
 type category struct {
 	name   string
 	values []string
@@ -166,7 +137,7 @@ func (c comparison) Evaluate(lp *LogicPuzzle) valueSet {
 
 func (c comparison) TypeCheck() bool {
 	l, r := c.left.Type(), c.right.Type()
-	return l != "int" && l != "bool" && l == r
+	return l != "int" && l != "bool" && r != "int" && r != "bool"
 }
 
 func (c comparison) Type() string {
