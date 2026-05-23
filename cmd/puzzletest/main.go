@@ -5,13 +5,14 @@ import (
 
 	"github.com/offpath/puzzleutils/internal/csp"
 	"github.com/offpath/puzzleutils/internal/decide"
+	"github.com/offpath/puzzleutils/internal/layouts"
 	"github.com/offpath/puzzleutils/internal/puzzle"
 	"github.com/offpath/puzzleutils/internal/puzzletypes"
 	"github.com/offpath/puzzleutils/internal/tracker"
 )
 
 type Printer struct {
-	p *puzzle.GridPuzzle
+	p *layouts.Grid
 }
 
 func (s *Printer) CaptureSolution(p *csp.Problem) {
@@ -20,24 +21,9 @@ func (s *Printer) CaptureSolution(p *csp.Problem) {
 
 func main() {
 	fmt.Println("Hello World!!")
-	/*
-		sudoku.Init(
-			"53..7...." +
-				"6..195..." +
-				".98....6." +
-				"8...6...3" +
-				"4..8.3..1" +
-				"7...2...6" +
-				".6....28." +
-				"...419..5" +
-				"....8..79")
-	*/
 
-	p := puzzle.NewPuzzle2()
-	s := puzzletypes.NewSudoku(p)
-	s.Get(0, 0).SetInitialValue(p.GetIntValue(6))
-
-	sudoku0 := puzzle.NewSudokuPuzzle()
+	p0 := puzzle.NewPuzzle2()
+	sudoku0 := puzzletypes.NewSudoku(p0)
 	sudoku0.Init(
 		"........." +
 			".....3.85" +
@@ -49,16 +35,17 @@ func main() {
 			"..2.1...." +
 			"....4...9")
 
-	p0 := Printer{sudoku0}
+	printer0 := Printer{sudoku0}
 	s0 := csp.Settings{
 		DecisionTracker: tracker.PrintEveryLogN(10),
-		SolutionTracker: &p0,
+		SolutionTracker: &printer0,
 		Decider:         &decide.First{},
 	}
-	sudoku0.Solve(s0)
+	p0.Solve(s0)
 	//fmt.Printf("Decisions made: %d\n", p0.count)
 
-	sudoku1 := puzzle.NewSudokuPuzzle()
+	p1 := puzzle.NewPuzzle2()
+	sudoku1 := puzzletypes.NewSudoku(p1)
 	sudoku1.Init(
 		"........." +
 			".....3.85" +
@@ -70,16 +57,17 @@ func main() {
 			"..2.1...." +
 			"....4...9")
 
-	p1 := Printer{sudoku1}
+	printer1 := Printer{sudoku1}
 	s1 := csp.Settings{
 		DecisionTracker: tracker.PrintEveryLogN(10),
-		SolutionTracker: &p1,
+		SolutionTracker: &printer1,
 		Decider:         &decide.Min{},
 	}
-	sudoku1.Solve(s1)
+	p1.Solve(s1)
 	//fmt.Printf("Decisions made: %d\n", p1.count)
 
-	sudoku2 := puzzle.NewSudokuPuzzle()
+	p2 := puzzle.NewPuzzle2()
+	sudoku2 := puzzletypes.NewSudoku(p2)
 	sudoku2.Init(
 		"........." +
 			".....3.85" +
@@ -91,12 +79,12 @@ func main() {
 			"..2.1...." +
 			"....4...9")
 
-	p2 := Printer{sudoku2}
+	printer2 := Printer{sudoku2}
 	s2 := csp.Settings{
 		DecisionTracker: tracker.PrintEveryLogN(10),
-		SolutionTracker: &p2,
+		SolutionTracker: &printer2,
 		Decider:         &decide.MinMin{},
 	}
-	sudoku2.Solve(s2)
+	p2.Solve(s2)
 	//fmt.Printf("Decisions made: %d\n", p2.count)
 }
