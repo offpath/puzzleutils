@@ -26,7 +26,7 @@ var cryptogramTests = []struct {
 
 func TestCryptogram(t *testing.T) {
 	tr := trie.New()
-	tr.AddFile(filepath.Join("..", "puzzle", "testdata", "ospd2.txt"))
+	tr.AddFile(filepath.Join("testdata", "ospd2.txt"))
 	for _, tt := range cryptogramTests {
 		p := puzzle.NewPuzzle2()
 		result := NewCryptogramPuzzle(p, tt.input, tr)

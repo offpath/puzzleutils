@@ -119,7 +119,7 @@ TE
 
 func TestDropquote(t *testing.T) {
 	tr := trie.New()
-	tr.AddFile(filepath.Join("..", "puzzle", "testdata", "ospd2.txt"))
+	tr.AddFile(filepath.Join("testdata", "ospd2.txt"))
 	for _, tt := range dropquoteTests {
 		p := puzzle.NewPuzzle2()
 		dropquote := NewDropquote(p, tt.input, tr)
