@@ -7,10 +7,10 @@ import (
 
 type GridGraphPointConstraint struct {
 	node *layouts.Node
-	p    *puzzle.Puzzle2
+	p    *puzzle.Puzzle
 }
 
-func NewGridGraphPointConstraint(p *puzzle.Puzzle2, node *layouts.Node) *GridGraphPointConstraint {
+func NewGridGraphPointConstraint(p *puzzle.Puzzle, node *layouts.Node) *GridGraphPointConstraint {
 	return &GridGraphPointConstraint{node: node, p: p}
 }
 
@@ -61,10 +61,10 @@ func (c *GridGraphPointConstraint) Check() bool {
 type GridGraphBoxConstraint struct {
 	arcs []*layouts.Arc
 	n    int
-	p    *puzzle.Puzzle2
+	p    *puzzle.Puzzle
 }
 
-func NewGridGraphBoxConstraint(p *puzzle.Puzzle2, arcs []*layouts.Arc, n int) *GridGraphBoxConstraint {
+func NewGridGraphBoxConstraint(p *puzzle.Puzzle, arcs []*layouts.Arc, n int) *GridGraphBoxConstraint {
 	return &GridGraphBoxConstraint{arcs: arcs, n: n, p: p}
 }
 
@@ -117,10 +117,10 @@ func (c *GridGraphBoxConstraint) Check() bool {
 
 type GridGraphLoopConstraint struct {
 	graph *layouts.Graph
-	p     *puzzle.Puzzle2
+	p     *puzzle.Puzzle
 }
 
-func NewGridGraphLoopConstraint(p *puzzle.Puzzle2, graph *layouts.Graph) *GridGraphLoopConstraint {
+func NewGridGraphLoopConstraint(p *puzzle.Puzzle, graph *layouts.Graph) *GridGraphLoopConstraint {
 	return &GridGraphLoopConstraint{graph: graph, p: p}
 }
 

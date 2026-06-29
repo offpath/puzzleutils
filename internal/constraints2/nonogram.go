@@ -5,10 +5,10 @@ import "github.com/offpath/puzzleutils/internal/puzzle"
 type NonogramConstraint struct {
 	variables []*puzzle.Variable
 	lengths   []int
-	p         *puzzle.Puzzle2
+	p         *puzzle.Puzzle
 }
 
-func NewNonogramConstraint(p *puzzle.Puzzle2, variables []*puzzle.Variable, lengths []int) *NonogramConstraint {
+func NewNonogramConstraint(p *puzzle.Puzzle, variables []*puzzle.Variable, lengths []int) *NonogramConstraint {
 	return &NonogramConstraint{
 		variables: variables,
 		lengths:   lengths,

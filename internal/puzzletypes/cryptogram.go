@@ -13,7 +13,7 @@ type CryptogramPuzzle struct {
 	Codex map[string]*puzzle.Variable
 }
 
-func NewCryptogramPuzzle(p *puzzle.Puzzle2, input string, t *trie.Trie) *CryptogramPuzzle {
+func NewCryptogramPuzzle(p *puzzle.Puzzle, input string, t *trie.Trie) *CryptogramPuzzle {
 	result := &CryptogramPuzzle{
 		Codex: make(map[string]*puzzle.Variable),
 	}

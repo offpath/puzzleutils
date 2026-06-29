@@ -12,7 +12,7 @@ type Dropquote struct {
 	variables []*puzzle.Variable
 }
 
-func NewDropquote(p *puzzle.Puzzle2, input string, t *trie.Trie) *Dropquote {
+func NewDropquote(p *puzzle.Puzzle, input string, t *trie.Trie) *Dropquote {
 	lines := strings.Split(input, "\n")
 	numCols := len(lines[0])
 

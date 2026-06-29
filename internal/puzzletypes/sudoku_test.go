@@ -39,7 +39,7 @@ var sudokuTests = []struct {
 
 func TestSudoku(t *testing.T) {
 	for _, tt := range sudokuTests {
-		p := puzzle.NewPuzzle2()
+		p := puzzle.NewPuzzle()
 		sudoku := NewSudoku(p)
 		sudoku.Init(tt.input)
 		settings := csp.Settings{

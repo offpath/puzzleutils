@@ -118,7 +118,7 @@ var nonogramTests = []struct {
 
 func TestNonogram(t *testing.T) {
 	for _, tt := range nonogramTests {
-		p := puzzle.NewPuzzle2()
+		p := puzzle.NewPuzzle()
 		nonogram := NewNonogram(p, tt.rows, tt.cols)
 		settings := csp.Settings{
 			DecisionTracker: tracker.PrintEveryLogN(10),

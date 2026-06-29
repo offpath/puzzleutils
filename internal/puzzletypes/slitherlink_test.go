@@ -51,7 +51,7 @@ X | X | | |
 
 func TestSlitherlink(t *testing.T) {
 	for _, tt := range slitherlinkTests {
-		p := puzzle.NewPuzzle2()
+		p := puzzle.NewPuzzle()
 		slitherlink := NewSlitherlink(p, tt.input)
 		if !p.Solve(csp.Settings{Decider: &decide.First{}, DecisionTracker: tracker.PrintEveryN(1)}) {
 			t.Errorf("test: %s, failed to solve!\n", tt.name)

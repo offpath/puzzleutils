@@ -7,7 +7,7 @@ import (
 )
 
 type square struct {
-	open []bool
+	open    []bool
 	visited bool
 }
 
@@ -18,14 +18,14 @@ type coord struct {
 type Maze struct {
 	height, width int
 	start, finish coord
-	squares [][]*square
+	squares       [][]*square
 }
 
 func (m *Maze) wall(i, j int, direction int) string {
 	if m.squares[i][j].open[direction] {
 		return " "
 	}
-	if direction % 2 == 0 {
+	if direction%2 == 0 {
 		return "-"
 	}
 	return "|"
@@ -59,16 +59,16 @@ func NewMaze(height, width int, branchChancePct int) {
 	rand.Seed(time.Now().UTC().UnixNano())
 	m := Maze{
 		height: height,
-		width: width,
-		start: coord{0,rand.Intn(width)},
-		finish: coord{height-1,rand.Intn(width)},
+		width:  width,
+		start:  coord{0, rand.Intn(width)},
+		finish: coord{height - 1, rand.Intn(width)},
 	}
 	for i := 0; i < height; i++ {
 		m.squares = append(m.squares, nil)
 		for j := 0; j < width; j++ {
 			m.squares[i] = append(m.squares[i],
 				&square{
-					open: []bool{false, false, false, false},
+					open:    []bool{false, false, false, false},
 					visited: false,
 				})
 		}
@@ -110,12 +110,12 @@ func NewMaze(height, width int, branchChancePct int) {
 			switch avail[i] {
 			case 0:
 				pt2.row -= 1
-case 1:
+			case 1:
 				pt2.col += 1
 			case 2:
 				pt2.row += 1
 			case 3:
-				pt2.col -=1
+				pt2.col -= 1
 			}
 			m.squares[pt.row][pt.col].open[avail[i]] = true
 			m.squares[pt2.row][pt2.col].open[(avail[i]+2)%4] = true
@@ -124,5 +124,5 @@ case 1:
 		}
 	}
 	m.Print()
-			
+
 }

@@ -14,7 +14,7 @@ type Slitherlink struct {
 	cols  int
 }
 
-func NewSlitherlink(p *puzzle.Puzzle2, input string) *Slitherlink {
+func NewSlitherlink(p *puzzle.Puzzle, input string) *Slitherlink {
 	lines := strings.Split(input, "\n")
 	rows := len(lines)
 	cols := len(lines[0])

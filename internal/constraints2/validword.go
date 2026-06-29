@@ -6,13 +6,13 @@ import (
 )
 
 type ValidWordConstraint struct {
-	p         *puzzle.Puzzle2
+	p         *puzzle.Puzzle
 	variables []*puzzle.Variable
 	t         *trie.Trie
 	valueSet  puzzle.ValueSet
 }
 
-func NewValidWordConstraint(p *puzzle.Puzzle2, variables []*puzzle.Variable, t *trie.Trie, valueSet puzzle.ValueSet) *ValidWordConstraint {
+func NewValidWordConstraint(p *puzzle.Puzzle, variables []*puzzle.Variable, t *trie.Trie, valueSet puzzle.ValueSet) *ValidWordConstraint {
 	return &ValidWordConstraint{p, variables, t, valueSet}
 }
 

@@ -7,7 +7,7 @@ import (
 )
 
 func TestGraph(t *testing.T) {
-	p := puzzle.NewPuzzle2()
+	p := puzzle.NewPuzzle()
 	g := NewGraph(p)
 
 	n1 := g.AddNode()

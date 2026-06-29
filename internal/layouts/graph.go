@@ -24,12 +24,12 @@ type Arc struct {
 }
 
 type Graph struct {
-	p     *puzzle.Puzzle2
+	p     *puzzle.Puzzle
 	nodes []*Node
 	arcs  []*Arc
 }
 
-func NewGraph(p *puzzle.Puzzle2) *Graph {
+func NewGraph(p *puzzle.Puzzle) *Graph {
 	return &Graph{
 		p: p,
 	}
@@ -76,7 +76,7 @@ type SquareGridGraph struct {
 	nodes      [][]*Node
 }
 
-func NewSquareGridGraph(p *puzzle.Puzzle2, rows, cols int) *SquareGridGraph {
+func NewSquareGridGraph(p *puzzle.Puzzle, rows, cols int) *SquareGridGraph {
 	g := &SquareGridGraph{
 		graph: NewGraph(p),
 		rows:  rows,

@@ -20,7 +20,7 @@ var cryptogramTests = []struct {
 	{
 		name:  "trivial",
 		input: "ABBCCEEFEG",
-		want: "BOOKKEEPER",
+		want:  "BOOKKEEPER",
 	},
 }
 
@@ -28,7 +28,7 @@ func TestCryptogram(t *testing.T) {
 	tr := trie.New()
 	tr.AddFile(filepath.Join("testdata", "ospd2.txt"))
 	for _, tt := range cryptogramTests {
-		p := puzzle.NewPuzzle2()
+		p := puzzle.NewPuzzle()
 		result := NewCryptogramPuzzle(p, tt.input, tr)
 		if !p.Solve(csp.Settings{Decider: &decide.First{}, DecisionTracker: tracker.PrintEveryN(1)}) {
 			t.Errorf("test: %s, failed to solve!\n", tt.name)

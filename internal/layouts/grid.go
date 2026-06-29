@@ -10,10 +10,10 @@ type Grid struct {
 	rows      int
 	cols      int
 	variables [][]*puzzle.Variable
-	p         *puzzle.Puzzle2
+	p         *puzzle.Puzzle
 }
 
-func NewGrid(p *puzzle.Puzzle2, rows int, cols int) *Grid {
+func NewGrid(p *puzzle.Puzzle, rows int, cols int) *Grid {
 	result := &Grid{
 		rows:      rows,
 		cols:      cols,

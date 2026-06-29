@@ -6,7 +6,7 @@ import (
 	"github.com/offpath/puzzleutils/internal/puzzle"
 )
 
-func NewSudoku(p *puzzle.Puzzle2) *layouts.Grid {
+func NewSudoku(p *puzzle.Puzzle) *layouts.Grid {
 	result := layouts.NewGrid(p, 9, 9)
 	vs := p.GetIntRange(1, 9)
 	result.Fill(vs)

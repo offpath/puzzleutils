@@ -22,7 +22,7 @@ func (s *Printer) CaptureSolution(p *csp.Problem) {
 func main() {
 	fmt.Println("Hello World!!")
 
-	p0 := puzzle.NewPuzzle2()
+	p0 := puzzle.NewPuzzle()
 	sudoku0 := puzzletypes.NewSudoku(p0)
 	sudoku0.Init(
 		"........." +
@@ -44,7 +44,7 @@ func main() {
 	p0.Solve(s0)
 	//fmt.Printf("Decisions made: %d\n", p0.count)
 
-	p1 := puzzle.NewPuzzle2()
+	p1 := puzzle.NewPuzzle()
 	sudoku1 := puzzletypes.NewSudoku(p1)
 	sudoku1.Init(
 		"........." +
@@ -66,7 +66,7 @@ func main() {
 	p1.Solve(s1)
 	//fmt.Printf("Decisions made: %d\n", p1.count)
 
-	p2 := puzzle.NewPuzzle2()
+	p2 := puzzle.NewPuzzle()
 	sudoku2 := puzzletypes.NewSudoku(p2)
 	sudoku2.Init(
 		"........." +

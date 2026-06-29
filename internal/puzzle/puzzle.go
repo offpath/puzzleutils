@@ -45,7 +45,7 @@ func (vs ValueSet) Value() *Value {
 }
 
 type Variable struct {
-	p              *Puzzle2
+	p              *Puzzle
 	possibleValues ValueSet
 	currentValues  ValueSet
 	id             int
@@ -105,15 +105,15 @@ type group struct {
 	c         Constraint
 }
 
-type Puzzle2 struct {
+type Puzzle struct {
 	values    map[interface{}]*Value
 	variables []*Variable
 	groups    []*group
 	problem   *csp.Problem
 }
 
-func NewPuzzle2() *Puzzle2 {
-	return &Puzzle2{
+func NewPuzzle() *Puzzle {
+	return &Puzzle{
 		values:    map[interface{}]*Value{},
 		variables: nil,
 		groups:    nil,
@@ -121,7 +121,7 @@ func NewPuzzle2() *Puzzle2 {
 	}
 }
 
-func (p *Puzzle2) GetIntValue(i int) *Value {
+func (p *Puzzle) GetIntValue(i int) *Value {
 	if val, ok := p.values[i]; ok {
 		return val
 	}
@@ -130,7 +130,7 @@ func (p *Puzzle2) GetIntValue(i int) *Value {
 	return val
 }
 
-func (p *Puzzle2) GetBoolValue(b bool) *Value {
+func (p *Puzzle) GetBoolValue(b bool) *Value {
 	if val, ok := p.values[b]; ok {
 		return val
 	}
@@ -139,7 +139,7 @@ func (p *Puzzle2) GetBoolValue(b bool) *Value {
 	return val
 }
 
-func (p *Puzzle2) GetStringValue(s string) *Value {
+func (p *Puzzle) GetStringValue(s string) *Value {
 	if val, ok := p.values[s]; ok {
 		return val
 	}
@@ -148,7 +148,7 @@ func (p *Puzzle2) GetStringValue(s string) *Value {
 	return val
 }
 
-func (p *Puzzle2) GetIntRange(min, max int) ValueSet {
+func (p *Puzzle) GetIntRange(min, max int) ValueSet {
 	result := ValueSet{}
 	for i := min; i <= max; i++ {
 		result[p.GetIntValue(i)] = true
@@ -156,7 +156,7 @@ func (p *Puzzle2) GetIntRange(min, max int) ValueSet {
 	return result
 }
 
-func (p *Puzzle2) GetStringRange(values []string) ValueSet {
+func (p *Puzzle) GetStringRange(values []string) ValueSet {
 	result := ValueSet{}
 	for _, s := range values {
 		result[p.GetStringValue(s)] = true
@@ -164,11 +164,11 @@ func (p *Puzzle2) GetStringRange(values []string) ValueSet {
 	return result
 }
 
-func (p *Puzzle2) GetAlphabet() ValueSet {
+func (p *Puzzle) GetAlphabet() ValueSet {
 	return p.GetStringRange([]string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"})
 }
 
-func (p *Puzzle2) NewVariable() *Variable {
+func (p *Puzzle) NewVariable() *Variable {
 	result := &Variable{
 		p:              p,
 		possibleValues: ValueSet{},
@@ -180,14 +180,14 @@ func (p *Puzzle2) NewVariable() *Variable {
 	return result
 }
 
-func (p *Puzzle2) AddConstraint(c Constraint) {
+func (p *Puzzle) AddConstraint(c Constraint) {
 	p.groups = append(p.groups, &group{
 		variables: c.Variables(),
 		c:         c,
 	})
 }
 
-func (p *Puzzle2) MarkEqual(vars ...*Variable) {
+func (p *Puzzle) MarkEqual(vars ...*Variable) {
 	if len(vars) < 2 {
 		return
 	}
@@ -247,7 +247,7 @@ func (c valueSetConstraint) Apply(all, dirty []*csp.Decision) bool {
 	return true
 }
 
-func (p *Puzzle2) Solve(settings csp.Settings) bool {
+func (p *Puzzle) Solve(settings csp.Settings) bool {
 	numDecisions := 0
 	for _, v := range p.variables {
 		if v.rep == v {

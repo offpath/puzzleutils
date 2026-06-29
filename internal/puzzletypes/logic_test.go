@@ -42,7 +42,7 @@ Wade, lemon snapper, 42`,
 
 func TestLogic(t *testing.T) {
 	for _, tt := range logicTests {
-		p := puzzle.NewPuzzle2()
+		p := puzzle.NewPuzzle()
 		logic := NewLogicPuzzle(p, tt.input)
 		if !p.Solve(csp.Settings{Decider: &decide.First{}, DecisionTracker: tracker.PrintEveryN(1)}) {
 			t.Errorf("test: %s, failed to solve!\n", tt.name)

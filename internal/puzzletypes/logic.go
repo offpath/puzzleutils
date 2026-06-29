@@ -17,7 +17,7 @@ type category struct {
 }
 
 type LogicPuzzle struct {
-	p             *puzzle.Puzzle2
+	p             *puzzle.Puzzle
 	categories    map[string]*category
 	categoryNames []string
 	values        map[string]*val
@@ -323,7 +323,7 @@ func (lp *LogicPuzzle) LookupValue(category string, index int) string {
 	return lp.categories[category].values[index]
 }
 
-func NewLogicPuzzle(p *puzzle.Puzzle2, s string) *LogicPuzzle {
+func NewLogicPuzzle(p *puzzle.Puzzle, s string) *LogicPuzzle {
 	lines := strings.Split(s, "\n")
 	result := &LogicPuzzle{
 		p:          p,

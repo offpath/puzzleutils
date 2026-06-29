@@ -6,7 +6,7 @@ import (
 	"github.com/offpath/puzzleutils/internal/puzzle"
 )
 
-func NewNonogram(p *puzzle.Puzzle2, rows, cols [][]int) *layouts.Grid {
+func NewNonogram(p *puzzle.Puzzle, rows, cols [][]int) *layouts.Grid {
 	result := layouts.NewGrid(p, len(rows), len(cols))
 	vs := puzzle.ValueSet{
 		p.GetBoolValue(false): true,
