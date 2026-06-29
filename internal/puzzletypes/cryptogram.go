@@ -3,7 +3,7 @@ package puzzletypes
 import (
 	"strings"
 
-	"github.com/offpath/puzzleutils/internal/constraints2"
+	"github.com/offpath/puzzleutils/internal/constraints"
 	"github.com/offpath/puzzleutils/internal/puzzle"
 	"github.com/offpath/puzzleutils/internal/trie"
 )
@@ -34,7 +34,7 @@ func NewCryptogramPuzzle(p *puzzle.Puzzle, input string, t *trie.Trie) *Cryptogr
 			}
 			word = append(word, v)
 		}
-		p.AddConstraint(constraints2.NewValidWordConstraint(p, word, t, alphabet))
+		p.AddConstraint(constraints.NewValidWordConstraint(p, word, t, alphabet))
 		result.Words = append(result.Words, word)
 	}
 
@@ -42,7 +42,7 @@ func NewCryptogramPuzzle(p *puzzle.Puzzle, input string, t *trie.Trie) *Cryptogr
 	for _, v := range result.Codex {
 		allVars = append(allVars, v)
 	}
-	p.AddConstraint(constraints2.NewUniqueConstraint(allVars, alphabet))
+	p.AddConstraint(constraints.NewUniqueConstraint(allVars, alphabet))
 
 	return result
 }

@@ -3,7 +3,7 @@ package puzzletypes
 import (
 	"strings"
 
-	"github.com/offpath/puzzleutils/internal/constraints2"
+	"github.com/offpath/puzzleutils/internal/constraints"
 	"github.com/offpath/puzzleutils/internal/layouts"
 	"github.com/offpath/puzzleutils/internal/puzzle"
 )
@@ -23,7 +23,7 @@ func NewSlitherlink(p *puzzle.Puzzle, input string) *Slitherlink {
 
 	for r := 0; r <= rows; r++ {
 		for c := 0; c <= cols; c++ {
-			p.AddConstraint(constraints2.NewGridGraphPointConstraint(p, g.Get(r, c)))
+			p.AddConstraint(constraints.NewGridGraphPointConstraint(p, g.Get(r, c)))
 		}
 	}
 
@@ -31,12 +31,12 @@ func NewSlitherlink(p *puzzle.Puzzle, input string) *Slitherlink {
 		for c := 0; c < cols; c++ {
 			if lines[r][c] != '.' {
 				n := int(lines[r][c] - '0')
-				p.AddConstraint(constraints2.NewGridGraphBoxConstraint(p, g.SurroundingArcs(r, c), n))
+				p.AddConstraint(constraints.NewGridGraphBoxConstraint(p, g.SurroundingArcs(r, c), n))
 			}
 		}
 	}
 
-	p.AddConstraint(constraints2.NewGridGraphLoopConstraint(p, g.Graph()))
+	p.AddConstraint(constraints.NewGridGraphLoopConstraint(p, g.Graph()))
 
 	return &Slitherlink{
 		graph: g,

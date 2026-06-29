@@ -3,7 +3,7 @@ package puzzletypes
 import (
 	"strings"
 
-	"github.com/offpath/puzzleutils/internal/constraints2"
+	"github.com/offpath/puzzleutils/internal/constraints"
 	"github.com/offpath/puzzleutils/internal/puzzle"
 	"github.com/offpath/puzzleutils/internal/trie"
 )
@@ -68,10 +68,10 @@ func NewDropquote(p *puzzle.Puzzle, input string, t *trie.Trie) *Dropquote {
 	}
 
 	for _, group := range wordGroups {
-		p.AddConstraint(constraints2.NewValidWordConstraint(p, group, t, alphabet))
+		p.AddConstraint(constraints.NewValidWordConstraint(p, group, t, alphabet))
 	}
 	for i := 0; i < numCols; i++ {
-		p.AddConstraint(constraints2.NewSetCountConstraint(cols[i], colSets[i], isCovering[i]))
+		p.AddConstraint(constraints.NewSetCountConstraint(cols[i], colSets[i], isCovering[i]))
 		allowedVals := puzzle.ValueSet{}
 		for val := range colSets[i] {
 			allowedVals[val] = true

@@ -1,4 +1,4 @@
-package constraints2
+package constraints
 
 import "github.com/offpath/puzzleutils/internal/puzzle"
 

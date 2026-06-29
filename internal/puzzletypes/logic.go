@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/offpath/puzzleutils/internal/constraints2"
+	"github.com/offpath/puzzleutils/internal/constraints"
 	"github.com/offpath/puzzleutils/internal/puzzle"
 )
 
@@ -368,7 +368,7 @@ func NewLogicPuzzle(p *puzzle.Puzzle, s string) *LogicPuzzle {
 			v.SetValueRange(allowedVals)
 			result.vars[catName][m] = v
 		}
-		p.AddConstraint(constraints2.NewUniqueConstraint(result.vars[catName], allowedVals))
+		p.AddConstraint(constraints.NewUniqueConstraint(result.vars[catName], allowedVals))
 	}
 
 	i++
