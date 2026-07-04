@@ -15,8 +15,9 @@ type Printer struct {
 	p *layouts.Grid
 }
 
-func (s *Printer) CaptureSolution(p *csp.Problem) {
+func (s *Printer) CaptureSolution(p *csp.Problem) bool {
 	fmt.Print(s.p)
+	return true
 }
 
 func main() {

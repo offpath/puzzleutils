@@ -247,6 +247,24 @@ func (c valueSetConstraint) Apply(all, dirty []*csp.Decision) bool {
 	return true
 }
 
+type solutionTrackerWrapper struct {
+	tracker csp.SolutionTracker
+	p       *Puzzle
+}
+
+func (w *solutionTrackerWrapper) CaptureSolution(prob *csp.Problem) bool {
+	for _, v := range w.p.variables {
+		v = v.root()
+		v.currentValues = v.possibleValues.Clone()
+		for val := range v.currentValues {
+			if !w.p.problem.Get(v.id).Possible(val.id) {
+				delete(v.currentValues, val)
+			}
+		}
+	}
+	return w.tracker.CaptureSolution(prob)
+}
+
 func (p *Puzzle) Solve(settings csp.Settings) bool {
 	numDecisions := 0
 	for _, v := range p.variables {
@@ -276,6 +294,12 @@ func (p *Puzzle) Solve(settings csp.Settings) bool {
 			}
 		}
 		p.problem.AddGroup(group, constraintShim{g.c})
+	}
+	if settings.SolutionTracker != nil {
+		settings.SolutionTracker = &solutionTrackerWrapper{
+			tracker: settings.SolutionTracker,
+			p:       p,
+		}
 	}
 	return p.problem.Solve(settings)
 }

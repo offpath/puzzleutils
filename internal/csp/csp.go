@@ -114,9 +114,10 @@ type DecisionTracker interface {
 
 // A SolutionTracker is an interface that is called during a solve
 // whenever a solution is found. It can be use to print, record,
-// summarize, or sample solutions.
+// summarize, or sample solutions. If it returns false, the solver
+// treats the solution as a dead end and continues searching.
 type SolutionTracker interface {
-	CaptureSolution(p *Problem)
+	CaptureSolution(p *Problem) bool
 }
 
 // A Decider decides which decision to decide next. Seriously. Wow
@@ -139,9 +140,10 @@ type Problem struct {
 	valueSize int
 	decisions []*Decision
 	groups    []*Group
-	undoStack []map[*Decision]undoRestricts
-	dirty     map[*Decision]bool
-	conflict  bool
+	undoStack      []map[*Decision]undoRestricts
+	dirty          map[*Decision]bool
+	conflict       bool
+	solutionsFound int
 }
 
 func (p *Problem) Size() int {
@@ -206,13 +208,14 @@ func (p *Problem) setConflict() {
 	p.conflict = true
 }
 
-// Attempts to solve the Problem, and returns true if a solution
-// exists.
+// Attempts to solve the Problem, and returns true if at least
+// one solution was found.
 func (p *Problem) Solve(s Settings) bool {
 	if !p.check() {
 		return false
 	}
-	return p.recSolve(s)
+	p.recSolve(s)
+	return p.solutionsFound > 0
 }
 
 func (p *Problem) recSolve(s Settings) bool {
@@ -223,8 +226,9 @@ func (p *Problem) recSolve(s Settings) bool {
 		}
 	}
 	if len(ds) == 0 {
+		p.solutionsFound++
 		if s.SolutionTracker != nil {
-			s.CaptureSolution(p)
+			return s.CaptureSolution(p)
 		}
 		return true
 	}
